@@ -1,4 +1,4 @@
-function ExtractSubstream(IDR, frame_num, pri_vec_seq, target_bytes)
+function ExtractSubstream(DIR, frame_num, pri_vec_seq, target_bytes)
 SeqFrameNum = frame_num - 1; % first frame not included
 GroupFrameNum = 32;
 MaxQid = 2;
