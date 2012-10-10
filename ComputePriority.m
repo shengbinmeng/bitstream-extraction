@@ -1,8 +1,8 @@
-function [discard_order, priority_vector] = ComputePriority(DIR, frame_start, frame_num)
+function [discard_order, priority_vector] = ComputePriority(SEQ, frame_start, frame_num)
 %
 
+DIR = ['..\\', SEQ];
 %frame_start = 1;
-%frame_num = 32; % 4 GOP
 Width = 352;
 Height = 288;
 MaxQid = 2;
@@ -37,7 +37,7 @@ for i = 0:gop_num-1
     packets(:,i*8+1:i*8+8) = gop_packets + i * MaxQid*8;
 end
 
-trace = fopen([DIR, '\\trc\\', 'Foreman.txt'], 'r');
+trace = fopen([DIR, '\\trc\\', SEQ, '.txt'], 'r');
 for i = 1:10+frame_start*(2+MaxQid)
     fgetl(trace);
 end
@@ -54,10 +54,10 @@ fclose(trace);
 %-------- Initialize the e_full matrix: -------------
 % Difference between reconstructional and original Y
 
-orig_file = [DIR, '\\yuv\\', '\Foreman.yuv'];
+orig_file = [DIR, '\\yuv\\', SEQ, '.yuv'];
 orig = ReadYUV(orig_file, Width, Height, frame_start, frame_num);
 
-recon_file = [DIR, '\\yuv\\', 'Foreman_dec.yuv'];
+recon_file = [DIR, '\\yuv\\', SEQ, '_dec.yuv'];
 recon = ReadYUV(recon_file, Width, Height, frame_start, frame_num);
 recon_y = zeros(Width*Height, frame_num);
 orig_y = zeros(Width*Height, frame_num);
@@ -65,17 +65,18 @@ for i = 1:frame_num
     recon_y(:,i) = recon(i).Y;
     orig_y(:,i) = orig(i).Y;
 end
-e_full = recon_y - orig_y;
+e_seq = recon_y - orig_y; %e_full
+clear orig recon recon_y orig_y 
 
-e_seq = e_full;
-mse_seq = mean(e_seq.^2);
+mse_seq = mean(mean(e_seq.^2));
 psnr_seq = 10*log10(255^2./mse_seq);
+%{
 e_seq2 = reshape(e_seq, Width*Height*frame_num, 1);
 mse_seq2 = mean(e_seq2.^2);
 psnr_seq2 = 10*log10(255^2./mse_seq2);
+%}
 
 e_pkt = zeros(Width * Height, frame_num);
-
 for j = 1:MaxQid*frame_num
     phi_pkt = zeros(1, frame_num);
     mse_pkt = zeros(1, frame_num);
@@ -87,7 +88,8 @@ for j = 1:MaxQid*frame_num
             continue;
         end
         
-        packet_error =  PacketError(packets(1,i), 2);
+        pkt_err_all = AllPacketError();
+        packet_error =  pkt_err_all(packets(1,i),:,:);
         gop_idx = ceil(i / 8);
         offset = (gop_idx-1)*8;
         affect_frames = 15;
@@ -95,18 +97,12 @@ for j = 1:MaxQid*frame_num
             affect_frames = frame_num - offset;
         end
         e_pkt(:,offset+1:offset+affect_frames) = packet_error(:,1:affect_frames);
-        e_pkt2 = reshape(e_pkt, Width * Height * frame_num, 1);
-        mse_pkt(i) = mean((e_pkt2 + e_seq2).^2);
-        tmp = mean(mean((e_pkt + e_seq).^2));
+        mse_pkt(i) = mean(mean((e_pkt + e_seq).^2));
         psnr_pkt(i) = 10*log10(255^2./mse_pkt(i));
-        tmp = 10*log10(255^2./tmp);
-        phi_pkt(i) = (psnr_seq2 - psnr_pkt(i))/pkt_length(packets(1, i));
+        phi_pkt(i) = (psnr_seq - psnr_pkt(i))/pkt_length(packets(1, i));
     end
     
     [min_psnr, min_idx] = min(phi_pkt);
-    if (packets(1, min_idx) == 0)
-        display('debug');
-    end
     display(packets(1, min_idx));
     
     discard_order = cat(2, discard_order, packets(1, min_idx));
@@ -121,13 +117,9 @@ for j = 1:MaxQid*frame_num
     end
     e_pkt(:,offset+1:offset+affect_frames) = packet_error(:,1:affect_frames);
     e_seq = e_seq + e_pkt;
-    mse_seq = mean(e_seq.^2);
+    mse_seq = mean(mean(e_seq.^2));
     psnr_seq = 10*log10(255^2./mse_seq);
     
-    e_seq2 = reshape(e_seq, Width*Height*frame_num, 1);
-    mse_seq2 = mean(e_seq2.^2);
-    psnr_seq2 = 10*log10(255^2./mse_seq2);
-
     packets(1:MaxQid-1, min_idx) = packets(2:MaxQid, min_idx);
     packets(MaxQid, min_idx) = 0;
 end

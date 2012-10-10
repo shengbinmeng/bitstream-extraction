@@ -22,7 +22,6 @@ for v0 = 1:MaxQid
                                 for i = 1:10
                                     tline = fgetl(trace);
                                     fprintf(tmp, [tline, '\r\n']);
-                                    % disp(tline);
                                 end
                                 
                                 % frm 0
@@ -35,7 +34,6 @@ for v0 = 1:MaxQid
                                 for i = 1:2 %prefix and base layer
                                     tline = fgetl(trace);
                                     fprintf(tmp, [tline, '\r\n']);
-                                    % disp(tline);
                                 end
                                 for i = 1:v0
                                     tline = fgetl(trace);
@@ -50,7 +48,6 @@ for v0 = 1:MaxQid
                                 for i = 1:2
                                     tline = fgetl(trace);
                                     fprintf(tmp, [tline, '\r\n']);
-                                    % disp(tline);
                                 end
                                 for i = 1:v1
                                     tline = fgetl(trace);
@@ -65,7 +62,6 @@ for v0 = 1:MaxQid
                                 for i = 1:2
                                     tline = fgetl(trace);
                                     fprintf(tmp, [tline, '\r\n']);
-                                    % disp(tline);
                                 end
                                 for i = 1:v21
                                     tline = fgetl(trace);
@@ -80,7 +76,6 @@ for v0 = 1:MaxQid
                                 for i = 1:2
                                     tline = fgetl(trace);
                                     fprintf(tmp, [tline, '\r\n']);
-                                    % disp(tline);
                                 end
                                 for i = 1:v22
                                     tline = fgetl(trace);
@@ -95,7 +90,6 @@ for v0 = 1:MaxQid
                                 for i = 1:2
                                     tline = fgetl(trace);
                                     fprintf(tmp, [tline, '\r\n']);
-                                    % disp(tline);
                                 end
                                 for i = 1:v31
                                     tline = fgetl(trace);
@@ -110,7 +104,6 @@ for v0 = 1:MaxQid
                                 for i = 1:2
                                     tline = fgetl(trace);
                                     fprintf(tmp, [tline, '\r\n']);
-                                    % disp(tline);
                                 end
                                 for i = 1:v32
                                     tline = fgetl(trace);
@@ -125,7 +118,6 @@ for v0 = 1:MaxQid
                                 for i = 1:2
                                     tline = fgetl(trace);
                                     fprintf(tmp, [tline, '\r\n']);
-                                    % disp(tline);
                                 end
                                 for i = 1:v33
                                     tline = fgetl(trace);
@@ -140,7 +132,6 @@ for v0 = 1:MaxQid
                                 for i = 1:2
                                     tline = fgetl(trace);
                                     fprintf(tmp, [tline, '\r\n']);
-                                    % disp(tline);
                                 end
                                 for i = 1:v34
                                     tline = fgetl(trace);
@@ -165,21 +156,16 @@ for v0 = 1:MaxQid
                                 extract_yuv = ReadYUV([DIR, '\\yuv\\', file_name, '.yuv'], Width, Height, 1, 8);
                                 orig_yuv = ReadYUV([DIR, '\\yuv\\Foreman_41frm.yuv'], Width, Height, 1, 8);
                                 full_yuv = ReadYUV([DIR, '\\yuv\\Foreman_dec.yuv'], Width, Height, 1, 8);
-                                extract_y = [];
-                                orig_y = [];
-                                full_y = [];
-                                for i = 1:8
-                                    extract_y = [extract_y extract_yuv(i).Y];
-                                    orig_y = [orig_y orig_yuv(i).Y];
-                                    full_y = [full_y full_yuv(i).Y];
-                                end
+                                extract_y = extract_yuv.Y;
+                                orig_y = orig_yuv.Y;
+                                full_y = full_yuv.Y;
                                 e_full = double(full_y) - double(orig_y);
                                 
                                 error = double(extract_y) - double(orig_y);
                                 mse = sum(sum(error.^2))/(352*288*8);
                                 
                                 %error_est = zeros(Width*Height, 8);            %this means no ref
-                                error_est = e_full;                                      
+                                error_est = e_full;
                                 for i = v0+1:MaxQid
                                     error_est = error_est + PacketError(i,1);
                                 end

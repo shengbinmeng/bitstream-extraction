@@ -44,10 +44,14 @@ packet_error = zeros(Width*Height, 8*gop_num);
 offset = (gop_idx-1)*8;
 if (tid == 0)
     if (gop_num > 1)
-        packet_error(:,1:15) = error_vector(:,(offset+1):(offset+15));
+        frames = length(error_vector(1,:)) - offset;
+        if (frames > 15)
+            frames = 15;
+        end
     else
-        packet_error(:,1:8) = error_vector(:,(offset+1):(offset+8));
+        frames = 8;
     end
+    packet_error(:,1:frames) = error_vector(:,(offset+1):(offset+frames));
 elseif (tid == 1)
     packet_error(:,(frame_idx-3):(frame_idx+3)) = error_vector(:,(offset+frame_idx-3):(offset+frame_idx+3));
 elseif (tid == 2)

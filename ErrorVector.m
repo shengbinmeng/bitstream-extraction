@@ -1,12 +1,12 @@
-function ErrorVector(DIR)
-% compute error vector of every packet
+function ErrorVector(SEQ, frame_num)
+% compute error vector of every packet (run by group)
 
-trace = fopen([DIR, '\\trc\\Foreman.txt'], 'r');
+DIR = ['..\\', SEQ];
+trace = fopen([DIR, '\\trc\\', SEQ, '.txt'], 'r');
 TemporalLevelPos = 28;
 QualityLevelPos = 33;
 Width = 352;
 Height = 288;
-FrameCount = 40;
 MaxQId = 2;
 MaxTId = 3;
 
@@ -58,7 +58,7 @@ for qlayer = MaxQId:-1:1
     
     % extract and decode
     fid = fopen('Extract.bat', 'w');
-    tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Foreman.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
+    tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\', SEQ, '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
     fprintf(fid, tline);
     tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
     fprintf(fid, tline);
@@ -66,26 +66,26 @@ for qlayer = MaxQId:-1:1
     !Extract.bat
     
     if (qlayer == MaxQId) %lowest EL
-        ref_name = 'Foreman_dec';
+        ref_name = [SEQ ,'_dec'];
     else
         ref_name = ['Discard_Group_t0q', int2str(qlayer+1), '_odd'];
     end
-    frames_ref = ReadYUV([DIR, '\\yuv\\', ref_name '.yuv'], Width, Height, 1, FrameCount);
-    frames = ReadYUV([DIR, '\\yuv\\', file_name, '.yuv'], Width, Height, 1, FrameCount);
-    error_vector = [];
-    for frm = 1:FrameCount
+    frames_ref = ReadYUV([DIR, '\\yuv\\', ref_name '.yuv'], Width, Height, 1, frame_num);
+    frames = ReadYUV([DIR, '\\yuv\\', file_name, '.yuv'], Width, Height, 1, frame_num);
+    error_vector = zeros(Width*Height, frame_num);
+    for frm = 1:frame_num
         error = int16(frames(frm).Y) - int16(frames_ref(frm).Y);
         mse = 1/(Width*Height) * sum(error.^2);
         psnr = 10 * log10(255^2 / mse);
         display(psnr);
-        error_vector = [error_vector error];
+        error_vector(:,frm) = error;
     end
     save(['data\\', file_name, '-err.mat'], 'error_vector');
     
 
     % extract and decode
     fid = fopen('Extract.bat', 'w');
-    tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Foreman.264 ', DIR, '\\str\\', file_name1, '.264 -et ', DIR, '\\trc\\', file_name1, '.txt \r\n',];
+    tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\', SEQ, '.264 ', DIR, '\\str\\', file_name1, '.264 -et ', DIR, '\\trc\\', file_name1, '.txt \r\n',];
     fprintf(fid, tline);
     tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name1, '.264 ', DIR, '\\yuv\\', file_name1, '.yuv \r\n'];
     fprintf(fid, tline);
@@ -93,19 +93,19 @@ for qlayer = MaxQId:-1:1
     !Extract.bat
     
     if (qlayer == MaxQId) %lowest EL
-        ref_name = 'Foreman_dec';
+        ref_name = [SEQ ,'_dec'];
     else
         ref_name = ['Discard_Group_t0q', int2str(qlayer+1), '_even'];
     end
-    frames_ref = ReadYUV([DIR, '\\yuv\\', ref_name '.yuv'], Width, Height, 1, FrameCount);
-    frames = ReadYUV([DIR, '\\yuv\\', file_name1, '.yuv'], Width, Height, 1, FrameCount);
-    error_vector = [];
-    for frm = 1:FrameCount
+    frames_ref = ReadYUV([DIR, '\\yuv\\', ref_name '.yuv'], Width, Height, 1, frame_num);
+    frames = ReadYUV([DIR, '\\yuv\\', file_name1, '.yuv'], Width, Height, 1, frame_num);
+    error_vector = zeros(Width*Height, frame_num);
+    for frm = 1:frame_num
         error = int16(frames(frm).Y) - int16(frames_ref(frm).Y);
         mse = 1/(Width*Height) * sum(error.^2);
         psnr = 10 * log10(255^2 / mse);
         display(psnr);
-        error_vector = [error_vector error];
+        error_vector(:,frm) = error;
     end
     save(['data\\', file_name1, '-err.mat'], 'error_vector');
     
@@ -139,26 +139,26 @@ for qlayer = MaxQId:-1:1
         
         % extract and decode
         fid = fopen('Extract.bat', 'w');
-        tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Foreman.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
+        tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\', SEQ, '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
         fprintf(fid, tline);
         tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
         fprintf(fid, tline);
         fclose(fid);
         !Extract.bat
         if (qlayer == MaxQId) %highest EL
-            ref_name = 'Foreman_dec';
+            ref_name = [SEQ ,'_dec'];
         else
             ref_name = ['Discard_Group_t', int2str(tlayer), 'q', int2str(qlayer+1)];
         end
-        frames_ref = ReadYUV([DIR, '\\yuv\\', ref_name '.yuv'], Width, Height, 1, FrameCount);
-        frames = ReadYUV([DIR, '\\yuv\\', file_name, '.yuv'], Width, Height, 1, FrameCount);
-        error_vector = [];
-        for frm = 1:FrameCount
+        frames_ref = ReadYUV([DIR, '\\yuv\\', ref_name '.yuv'], Width, Height, 1, frame_num);
+        frames = ReadYUV([DIR, '\\yuv\\', file_name, '.yuv'], Width, Height, 1, frame_num);
+        error_vector = zeros(Width*Height, frame_num);
+        for frm = 1:frame_num
             error = int16(frames(frm).Y) - int16(frames_ref(frm).Y);
             mse = 1/(Width*Height) * sum(error.^2);
             psnr = 10 * log10(255^2 / mse);
             display(psnr);
-            error_vector = [error_vector error];
+            error_vector(:,frm) = error;
         end
         save(['data\\', file_name, '-err.mat'], 'error_vector');
     end
