@@ -7,8 +7,17 @@ function packet_error = PacketError(pkt_idx, gop_num)
 MaxQid = 2;
 Width = 352;
 Height = 288;
-
-gop_idx = ceil((pkt_idx)/(8*MaxQid)); % 1, 2, ...
+if (pkt_idx <= 2)
+    qid = MaxQid - mod(pkt_idx, MaxQid);
+    file_name = ['Discard_Group_t0q', int2str(qid), '_even'];
+    error_vector = [];
+    load(['data\\', file_name, '-err.mat'], 'error_vector');
+    packet_error = zeros(Width*Height, 8*gop_num);
+    packet_error(:,1:8) = error_vector(:,1:8);
+    return;
+end
+pkt_idx = pkt_idx - 2;
+gop_idx = ceil((pkt_idx)/(8*MaxQid)); %1, 2, ...
 pkt_idx = pkt_idx - 8*MaxQid * (gop_idx-1); % 1, 2, ..., 16
 
 if (pkt_idx <= MaxQid)
@@ -41,12 +50,12 @@ end
 error_vector = [];
 load(['data\\', file_name, '-err.mat'], 'error_vector');
 packet_error = zeros(Width*Height, 8*gop_num);
-offset = (gop_idx-1)*8;
+offset = (gop_idx-1)*8 + 1;
 if (tid == 0)
     if (gop_num > 1)
-        frames = length(error_vector(1,:)) - offset;
-        if (frames > 15)
-            frames = 15;
+        frames = 15;
+        if (offset + frames > length(error_vector(1,:)))
+            frames = length(error_vector(1,:)) - offset;
         end
     else
         frames = 8;

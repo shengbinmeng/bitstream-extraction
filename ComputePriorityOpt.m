@@ -1,4 +1,4 @@
-function priority_vector = ComputePriority(SEQ, frame_num)
+function priority_vector = ComputePriorityOpt(SEQ, frame_num)
 %
 
 DIR = ['..\\', SEQ];
@@ -71,63 +71,58 @@ clear orig recon recon_y orig_y
 mse_seq = mean(e_seq.^2);
 psnr_seq = mean(10*log10(255^2./mse_seq));
 
-pri_data = fopen(['data\\', int2str(frame_num), 'pri-data.txt'], 'w');
+discard_vector = zeros((2 + MaxQid)*frame_num,1);
+pri_data = fopen(['data\\', int2str(frame_num), 'pri-data-opt.txt'], 'w');
+trace = fopen([DIR, '\\trc\\', SEQ, int2str(frame_num), '.txt'], 'r');
 for j = 1:MaxQid*frame_num
     phi_pkt = zeros(1, frame_num);
+    psnr_pkt = zeros(1, frame_num);
     
     for i = 1:frame_num
         if packets(1, i) == 0
             phi_pkt(i) = Inf;
             continue;
         end
-        
-        packet_error =  PacketError(packets(1,i),2);
-        if (i == 1)
-            %first frame
-            affect_frames = 8;
-            offset = 0;
-        else
-            gop_idx = ceil((i-1) / 8);
-            offset = (gop_idx-1)*8 + 1;
-            affect_frames = 15;
-            if (offset + affect_frames > frame_num)
-                affect_frames = frame_num - offset;
+        next_discard_vector = discard_vector;
+        next_discard_vector((ceil(packets(1, i)/MaxQid)-1)*MaxQid + 2 + packets(1, i)) = 1;
+        next_trace = fopen([DIR, '\\trc\\next.txt'], 'w');
+        fseek(trace, 0 , 'bof');
+        for k = 1:8
+            line = fgetl(trace);
+            fprintf(next_trace, [line, '\r\n']);
+        end
+        for k = 1:(MaxQid+2)*frame_num
+            line = fgetl(trace);
+            if (next_discard_vector(k) == 0)
+                fprintf(next_trace, [line, '\r\n']);
             end
         end
+        fclose(next_trace);
         
-        e_pkt = zeros(Width * Height, frame_num);
-        e_pkt(:,offset+1:offset+affect_frames) = packet_error(:,1:affect_frames);
-        mse_pkt = mean((e_pkt + e_seq).^2);
-        psnr_pkt = mean(10*log10(255^2./mse_pkt));
-        delta_psnr = psnr_seq - psnr_pkt;
+        fid = fopen('ExtractOpt.bat', 'w');
+        tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\', SEQ, int2str(frame_num), '.264 ', DIR, '\\str\\next.264 -et ', DIR, '\\trc\\next.txt \r\n'];
+        fprintf(fid, tline);
+        tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\next.264 ', DIR, '\\yuv\\next.yuv \r\n'];
+        fprintf(fid, tline);
+        fclose(fid);
+        !ExtractOpt.bat
+        
+        psnr_pkt(i) = PSNR(orig_file, [DIR, '\\yuv\\next.yuv'], Width, Height, frame_num);
+        
+        delta_psnr = psnr_seq - psnr_pkt(i);
         phi_pkt(i) = abs(delta_psnr)/(pkt_length(packets(1,i))/1000.0);
         
         fprintf(pri_data, '%d %d %f %f %f \r\n', i, packets(1,i), delta_psnr, pkt_length(packets(1,i))/1000.0, phi_pkt(i));
     end
-
+    
     [min_phi, min_idx] = min(phi_pkt);
     display([min_phi, packets(1, min_idx)]);
     
     discard_order = cat(2, discard_order, packets(1, min_idx));
     priority_vector((ceil(packets(1, min_idx)/MaxQid)-1)*MaxQid + 2 + packets(1, min_idx)) = j;
-
-    packet_error =  PacketError(packets(1,min_idx), 2);
-    if (min_idx == 1)
-        affect_frames = 8;
-        offset = 0;
-    else
-        gop_idx = ceil((min_idx-1) / 8);
-        offset = (gop_idx-1)*8 + 1;
-        affect_frames = 15;
-        if (offset + affect_frames > frame_num)
-            affect_frames = frame_num - offset;
-        end
-    end
-    e_pkt = zeros(Width * Height, frame_num);
-    e_pkt(:,offset+1:offset+affect_frames) = packet_error(:,1:affect_frames);
-    e_seq = e_seq + e_pkt;
-    mse_seq = mean(e_seq.^2);
-    psnr_seq = mean(10*log10(255^2./mse_seq));
+    
+    discard_vector((ceil(packets(1, min_idx)/MaxQid)-1)*MaxQid + 2 + packets(1, min_idx)) = 1;
+    psnr_seq = psnr_pkt(min_idx);
     
     packets(1:MaxQid-1, min_idx) = packets(2:MaxQid, min_idx);
     packets(MaxQid, min_idx) = 0;
@@ -135,6 +130,7 @@ for j = 1:MaxQid*frame_num
     fprintf(pri_data, '\r\n%d %d %f %f\r\n', min_idx, packets(1,min_idx), min_phi, psnr_seq);
 end
 
-save('data\\pri_vec.mat', 'priority_vector', 'discard_order');
+save('data\\pri_vec-opt.mat', 'priority_vector', 'discard_order');
 fclose(pri_data);
+fclose(trace);
 end

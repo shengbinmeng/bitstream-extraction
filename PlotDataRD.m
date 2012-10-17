@@ -1,6 +1,6 @@
-function PlotDataRD()
+function PlotDataRD(frame_num)
 
-rd_data = fopen(['result\\', 'rd-data.txt'], 'r');
+rd_data = fopen(['data\\', int2str(frame_num), 'rd-data.txt'], 'r');
 C = textscan(rd_data, '%.2f %.2f %.2f %.2f');
 length = C{1};
 psnr_mine = C{2};

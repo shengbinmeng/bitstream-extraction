@@ -5,7 +5,7 @@ MaxQid = 2;
 MaxPriority = MaxQid * GroupFrameNum -1;
 
 trc_ori = fopen([DIR, '\\trc\\', 'Foreman.txt'], 'r');
-for i = 1:10
+for i = 1:8
     fgetl(trc_ori);
 end
 C = textscan(trc_ori, '%s%f%d%d%d%s%s%s');

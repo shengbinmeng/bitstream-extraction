@@ -1,8 +1,9 @@
-function ModelVerify(DIR)
+function ModelVerify(SEQ, frame_num)
 % extract all the possible combinations of enhancement packet numbers in
 % each frame in one GOP
 
-trace = fopen([DIR, '\\trc\Foreman.txt'], 'r');
+DIR = ['..\\', SEQ];
+trace = fopen([DIR, '\\trc\\', SEQ, int2str(frame_num), '.txt'], 'r');
 MaxQid = 2;
 Width = 352;
 Height = 288;
@@ -19,7 +20,7 @@ for v0 = 1:MaxQid
                                 fseek(trace, 0, 'bof');
                                 file_name = ['Extract_Gop_', int2str(v0), int2str(v1), int2str(v21), int2str(v22), int2str(v31), int2str(v32), int2str(v33), int2str(v34)];
                                 tmp = fopen([DIR, '\\trc\\', file_name, '.txt'], 'w');
-                                for i = 1:10
+                                for i = 1:8
                                     tline = fgetl(trace);
                                     fprintf(tmp, [tline, '\r\n']);
                                 end
@@ -145,7 +146,7 @@ for v0 = 1:MaxQid
                                 
                                 % decode and compare
                                 fid = fopen('Extract.bat', 'w');
-                                tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Foreman.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
+                                tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\', SEQ, int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
                                 fprintf(fid, tline);
                                 tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
                                 fprintf(fid, tline);
@@ -154,11 +155,14 @@ for v0 = 1:MaxQid
                                 !Extract.bat
                                 
                                 extract_yuv = ReadYUV([DIR, '\\yuv\\', file_name, '.yuv'], Width, Height, 1, 8);
-                                orig_yuv = ReadYUV([DIR, '\\yuv\\Foreman_41frm.yuv'], Width, Height, 1, 8);
-                                full_yuv = ReadYUV([DIR, '\\yuv\\Foreman_dec.yuv'], Width, Height, 1, 8);
-                                extract_y = extract_yuv.Y;
-                                orig_y = orig_yuv.Y;
-                                full_y = full_yuv.Y;
+                                orig_yuv = ReadYUV([DIR, '\\yuv\\', SEQ, '.yuv'], Width, Height, 1, 8);
+                                full_yuv = ReadYUV([DIR, '\\yuv\\', SEQ, int2str(frame_num), '_dec.yuv'], Width, Height, 1, 8);
+                                extract_y = [];
+                                orig_y = [];
+                                full_y = [];
+                                extract_y = [extract_y extract_yuv.Y];
+                                orig_y = [orig_y orig_yuv.Y];
+                                full_y = [full_y full_yuv.Y];
                                 e_full = double(full_y) - double(orig_y);
                                 
                                 error = double(extract_y) - double(orig_y);
@@ -167,28 +171,28 @@ for v0 = 1:MaxQid
                                 %error_est = zeros(Width*Height, 8);            %this means no ref
                                 error_est = e_full;
                                 for i = v0+1:MaxQid
-                                    error_est = error_est + PacketError(i,1);
+                                    error_est = error_est + PacketError(i+MaxQid,1);
                                 end
                                 for i = v1+MaxQid+1:MaxQid*2
-                                    error_est = error_est + PacketError(i,1);
+                                    error_est = error_est + PacketError(i+MaxQid,1);
                                 end
                                 for i = v21+MaxQid*2+1:MaxQid*3
-                                    error_est = error_est + PacketError(i,1);
+                                    error_est = error_est + PacketError(i+MaxQid,1);
                                 end
                                 for i = v22+MaxQid*3+1:MaxQid*4
-                                    error_est = error_est + PacketError(i,1);
+                                    error_est = error_est + PacketError(i+MaxQid,1);
                                 end
                                 for i = v31+MaxQid*4+1:MaxQid*5
-                                    error_est = error_est + PacketError(i,1);
+                                    error_est = error_est + PacketError(i+MaxQid,1);
                                 end
                                 for i = v32+MaxQid*5+1:MaxQid*6
-                                    error_est = error_est + PacketError(i,1);
+                                    error_est = error_est + PacketError(i+MaxQid,1);
                                 end
                                 for i = v33+MaxQid*6+1:MaxQid*7
-                                    error_est = error_est + PacketError(i,1);
+                                    error_est = error_est + PacketError(i+MaxQid,1);
                                 end
                                 for i = v34+MaxQid*7+1:MaxQid*8
-                                    error_est = error_est + PacketError(i,1);
+                                    error_est = error_est + PacketError(i+MaxQid,1);
                                 end
                                 
                                 mse_est = sum(sum(error_est.^2))/(352*288*8);
