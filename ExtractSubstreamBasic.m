@@ -30,7 +30,7 @@ if k < length(pri)
     tline = ['..\\bin\\BitStreamExtractorStatic -pt ', DIR, '\\trc\\extract-basic\\', file_name, '.txt ', DIR, '\\str\\extract-basic\\', file_name, '.264 \r\n'];
     fprintf(fid, tline);
     fclose(fid);
-    !Extract-ql.bat
+    !Extract-basic.bat
 end
 
 fclose(data);

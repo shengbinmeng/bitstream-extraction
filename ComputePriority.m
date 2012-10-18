@@ -132,9 +132,9 @@ for j = 1:MaxQid*frame_num
     packets(1:MaxQid-1, min_idx) = packets(2:MaxQid, min_idx);
     packets(MaxQid, min_idx) = 0;
     
-    fprintf(pri_data, '\r\n%d %d %f %f\r\n', min_idx, packets(1,min_idx), min_phi, psnr_seq);
+    fprintf(pri_data, '\r\n%d %d %f %f\r\n\r\n', min_idx, packets(1,min_idx), min_phi, psnr_seq);
 end
 
-save('data\\pri_vec.mat', 'priority_vector', 'discard_order');
+save(['data\\', int2str(frame_num), 'pri_vec.mat'], 'priority_vector', 'discard_order');
 fclose(pri_data);
 end

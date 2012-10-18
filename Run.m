@@ -1,4 +1,4 @@
-function run(SEQ, frame_num)
+function Run(SEQ, frame_num)
 ErrorVector(SEQ, frame_num);
 priority_vector = ComputePriority(SEQ, frame_num);
 ExtractSubstreamTest(SEQ, frame_num, priority_vector);
