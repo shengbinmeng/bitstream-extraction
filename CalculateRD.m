@@ -16,7 +16,7 @@ psnr_basic = zeros(num, 1);
 rd_data = fopen(['data\\', int2str(frame_num), 'rd-data.txt'], 'w');
 
 ori_yuv = [DIR, '\\yuv\\', SEQ, '.yuv'];
-for k = 1:5:length(pri)
+for k = 1:2:length(pri)
     file_name = [SEQ, '-ext', int2str(k) ,'of', int2str(num)];
     ext_yuv_mine = [DIR, '\\yuv\\extract-mine\\', file_name, '.yuv'];
     ext_yuv_ql = [DIR, '\\yuv\\extract-ql\\', file_name, '.yuv'];
@@ -42,6 +42,8 @@ if k < length(pri)
     fprintf(rd_data, '%.2f %.2f %.2f %.2f \r\n', len(k), psnr_mine(k), psnr_ql(k), psnr_basic(k));
 end
 
+s = sprintf('improvement max: %.2f, min: %.2f, mean: %.2f', max(psnr_mine - psnr_ql), min(psnr_mine - psnr_ql), mean(psnr_mine - psnr_ql));
+display(s);
 fclose(ext_data);
 fclose(rd_data);
 

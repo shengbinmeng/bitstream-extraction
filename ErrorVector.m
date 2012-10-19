@@ -95,7 +95,7 @@ for qlayer = MaxQid:-1:1
     frames = ReadYUV([DIR, '\\yuv\\', file_name1, '.yuv'], Width, Height, 0, frame_num);
     error_vector = zeros(Width*Height, frame_num);
     for frm = 1:frame_num
-        error = int16(frames(frm).Y) - int16(frames_ref(frm).Y);
+        error = double(frames(frm).Y) - double(frames_ref(frm).Y);
         mse = 1/(Width*Height) * sum(error.^2);
         psnr = 10 * log10(255^2 / mse);
         display(psnr);
@@ -109,7 +109,7 @@ for qlayer = MaxQid:-1:1
         file_name = ['Discard_Group_t', int2str(tlayer), 'q', int2str(qlayer)];
         tmp = fopen([DIR, '\\trc\\', file_name, '.txt'], 'w');
         % read parameter set
-        for i = 1:10
+        for i = 1:8
             tline = fgetl(trace);
             fprintf(tmp, [tline, '\r\n']);
         end
@@ -143,7 +143,7 @@ for qlayer = MaxQid:-1:1
         frames = ReadYUV([DIR, '\\yuv\\', file_name, '.yuv'], Width, Height, 0, frame_num);
         error_vector = zeros(Width*Height, frame_num);
         for frm = 1:frame_num
-            error = int16(frames(frm).Y) - int16(frames_ref(frm).Y);
+            error = double(frames(frm).Y) - double(frames_ref(frm).Y);
             mse = 1/(Width*Height) * sum(error.^2);
             psnr = 10 * log10(255^2 / mse);
             display(psnr);

@@ -20,9 +20,9 @@ gop_packets = zeros(MaxQid, 8);
 gop_packets(:, 8) = MaxQid:-1:1;
 gop_packets(:, 4) = MaxQid*2:-1:MaxQid*1 + 1;
 gop_packets(:, 2) = MaxQid*3:-1:MaxQid*2 + 1;
-gop_packets(:, 6) = MaxQid*4:-1:MaxQid*3 + 1;
-gop_packets(:, 1) = MaxQid*5:-1:MaxQid*4 + 1;
-gop_packets(:, 3) = MaxQid*6:-1:MaxQid*5 + 1;
+gop_packets(:, 1) = MaxQid*4:-1:MaxQid*3 + 1;
+gop_packets(:, 3) = MaxQid*5:-1:MaxQid*4 + 1;
+gop_packets(:, 6) = MaxQid*6:-1:MaxQid*5 + 1;
 gop_packets(:, 5) = MaxQid*7:-1:MaxQid*6 + 1;
 gop_packets(:, 7) = MaxQid*8:-1:MaxQid*7 + 1;
 %{
@@ -98,11 +98,13 @@ for j = 1:MaxQid*frame_num
         e_pkt = zeros(Width * Height, frame_num);
         e_pkt(:,offset+1:offset+affect_frames) = packet_error(:,1:affect_frames);
         mse_pkt = mean((e_pkt + e_seq).^2);
-        psnr_pkt = mean(10*log10(255^2./mse_pkt));
+        psnrs_pkt = 10*log10(255^2./mse_pkt);
+        psnr_pkt = mean(psnrs_pkt);
         delta_psnr = psnr_seq - psnr_pkt;
-        phi_pkt(i) = abs(delta_psnr)/(pkt_length(packets(1,i))/1000.0);
+        delta_r = pkt_length(packets(1,i));
+        phi_pkt(i) = abs(delta_psnr)/(delta_r/1000);
         
-        fprintf(pri_data, '%d %d %f %f %f \r\n', i, packets(1,i), delta_psnr, pkt_length(packets(1,i))/1000.0, phi_pkt(i));
+        fprintf(pri_data, '%d %d %f %f %f %d %f \r\n', i, packets(1,i), psnr_seq, psnr_pkt, delta_psnr, delta_r, phi_pkt(i));
     end
 
     [min_phi, min_idx] = min(phi_pkt);

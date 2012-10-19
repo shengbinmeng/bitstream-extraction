@@ -20,15 +20,21 @@ gop_packets = zeros(MaxQid, 8);
 gop_packets(:, 8) = MaxQid:-1:1;
 gop_packets(:, 4) = MaxQid*2:-1:MaxQid*1 + 1;
 gop_packets(:, 2) = MaxQid*3:-1:MaxQid*2 + 1;
-gop_packets(:, 6) = MaxQid*4:-1:MaxQid*3 + 1;
-gop_packets(:, 1) = MaxQid*5:-1:MaxQid*4 + 1;
-gop_packets(:, 3) = MaxQid*6:-1:MaxQid*5 + 1;
+gop_packets(:, 1) = MaxQid*4:-1:MaxQid*3 + 1;
+gop_packets(:, 3) = MaxQid*5:-1:MaxQid*4 + 1;
+gop_packets(:, 6) = MaxQid*6:-1:MaxQid*5 + 1;
 gop_packets(:, 5) = MaxQid*7:-1:MaxQid*6 + 1;
 gop_packets(:, 7) = MaxQid*8:-1:MaxQid*7 + 1;
 %{
 gop_packets = ...
 [10	6	12	4	14	8	16	2;
  9	5	11	3	13	7	15	1];
+ --THIS IS WRONG!
+%}
+%{
+gop_packets = ...
+[8	6	10	4	14	12	16	2;
+ 7	5	9	3	13	11	15	1];
 %}
 gop_num = (frame_num - 1)/8;
 packets = zeros(MaxQid, frame_num);
@@ -107,12 +113,24 @@ for j = 1:MaxQid*frame_num
         fclose(fid);
         !ExtractOpt.bat
         
+        ori_yuv = ReadYUV(orig_file, Width, Height, 0, frame_num);
+        rec_yuv = ReadYUV([DIR, '\\yuv\\next.yuv'], Width, Height, 0, frame_num);
+        ori_y = [];
+        rec_y = [];
+        ori_y = [ori_y ori_yuv.Y];
+        rec_y = [rec_y rec_yuv.Y];
+
+        mse = mean((double(rec_y) - double(ori_y)).^2);
+        psnr_frames = 10*log10(255^2./mse);
+        psnr_frames(psnr_frames == Inf) = 99.99;
+        psnr = mean(psnr_frames);
         psnr_pkt(i) = PSNR(orig_file, [DIR, '\\yuv\\next.yuv'], Width, Height, frame_num);
-        
+        psnr_pkt(i) = psnr;
         delta_psnr = psnr_seq - psnr_pkt(i);
-        phi_pkt(i) = abs(delta_psnr)/(pkt_length(packets(1,i))/1000.0);
+        delta_r = pkt_length(packets(1,i));
+        phi_pkt(i) = abs(delta_psnr)/(delta_r/1000.0);
         
-        fprintf(pri_data, '%d %d %f %f %f \r\n', i, packets(1,i), delta_psnr, pkt_length(packets(1,i))/1000.0, phi_pkt(i));
+        fprintf(pri_data, '%d %d %f %f %f %d %f \r\n', i, packets(1,i), psnr_seq, psnr_pkt(i), delta_psnr, delta_r, phi_pkt(i));
     end
     
     [min_phi, min_idx] = min(phi_pkt);

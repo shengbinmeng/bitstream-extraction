@@ -29,13 +29,17 @@ elseif (pkt_idx <= 2*MaxQid)
 elseif (pkt_idx <= 3*MaxQid)
     frame_idx = 2;
     tid = 2;
-elseif (pkt_idx <= 4*MaxQid)
+elseif (pkt_idx > 3*MaxQid && pkt_idx <= 5*MaxQid)
+    frame_idx = 1 + 2*(ceil((pkt_idx - 3*MaxQid)/MaxQid)-1);
+    tid = 3;
+elseif (pkt_idx > 5*MaxQid && pkt_idx <= 6*MaxQid)
     frame_idx = 6;
     tid = 2;
-else
-    frame_idx = 1 + 2*(ceil((pkt_idx-4*MaxQid)/MaxQid)-1);
+elseif (pkt_idx > 6*MaxQid)
+    frame_idx = 5 + 2*(ceil((pkt_idx - 6*MaxQid)/MaxQid)-1);
     tid = 3;
 end
+
 qid = MaxQid - mod(pkt_idx, MaxQid);
 if (tid == 0)
     if (mod(gop_idx, 2) == 0)
