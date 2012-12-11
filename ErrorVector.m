@@ -1,14 +1,14 @@
-function ErrorVector(SEQ, frame_num)
+function ErrorVector(DIR, frame_num)
 % compute error vector of every packet (run by group)
 
-DIR = ['..\\', SEQ];
-trace = fopen([DIR, '\\trc\\', SEQ, int2str(frame_num), '.txt'], 'r');
+trace = fopen([DIR, '\\trc\\Orig', int2str(frame_num), '.txt'], 'r');
 TemporalLevelPos = 28;
 QualityLevelPos = 33;
 Width = 352;
 Height = 288;
 MaxQid = 2;
 MaxTid = 3;
+ParamLines = 6;
 
 for qlayer = MaxQid:-1:1
     fseek(trace, 0, 'bof');
@@ -17,7 +17,7 @@ for qlayer = MaxQid:-1:1
     file_name1 = ['Discard_Group_t0q', int2str(qlayer), '_even'];
     tmp1 = fopen([DIR, '\\trc\\', file_name1, '.txt'], 'w');
     % read parameter set
-    for i = 1:8
+    for i = 1:2+ParamLines
         tline = fgetl(trace);
         fprintf(tmp, [tline, '\r\n']);
         fprintf(tmp1, [tline, '\r\n']);
@@ -52,7 +52,7 @@ for qlayer = MaxQid:-1:1
     
     % extract and decode
     fid = fopen('Extract.bat', 'w');
-    tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\', SEQ, int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
+    tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
     fprintf(fid, tline);
     tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
     fprintf(fid, tline);
@@ -60,7 +60,7 @@ for qlayer = MaxQid:-1:1
     !Extract.bat
     
     if (qlayer == MaxQid) %lowest EL
-        ref_name = [SEQ, int2str(frame_num), '_dec'];
+        ref_name = ['Orig', int2str(frame_num), '-dec'];
     else
         ref_name = ['Discard_Group_t0q', int2str(qlayer+1), '_odd'];
     end
@@ -74,12 +74,12 @@ for qlayer = MaxQid:-1:1
         display(psnr);
         error_vector(:,frm) = error;
     end
-    save(['data\\', file_name, '-err.mat'], 'error_vector');
+    save(['data\\', DIR(5:end), int2str(frame_num), '-', file_name, '-err.mat'], 'error_vector');
     
 
     % extract and decode
     fid = fopen('Extract.bat', 'w');
-    tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\', SEQ, int2str(frame_num), '.264 ', DIR, '\\str\\', file_name1, '.264 -et ', DIR, '\\trc\\', file_name1, '.txt \r\n',];
+    tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name1, '.264 -et ', DIR, '\\trc\\', file_name1, '.txt \r\n',];
     fprintf(fid, tline);
     tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name1, '.264 ', DIR, '\\yuv\\', file_name1, '.yuv \r\n'];
     fprintf(fid, tline);
@@ -87,7 +87,7 @@ for qlayer = MaxQid:-1:1
     !Extract.bat
     
     if (qlayer == MaxQid) %lowest EL
-        ref_name = [SEQ, int2str(frame_num), '_dec'];
+        ref_name = ['Orig', int2str(frame_num), '-dec'];
     else
         ref_name = ['Discard_Group_t0q', int2str(qlayer+1), '_even'];
     end
@@ -101,7 +101,7 @@ for qlayer = MaxQid:-1:1
         display(psnr);
         error_vector(:,frm) = error;
     end
-    save(['data\\', file_name1, '-err.mat'], 'error_vector');
+    save(['data\\', DIR(5:end), int2str(frame_num), '-', file_name1, '-err.mat'], 'error_vector');
     
     
     for tlayer = 1:MaxTid
@@ -109,7 +109,7 @@ for qlayer = MaxQid:-1:1
         file_name = ['Discard_Group_t', int2str(tlayer), 'q', int2str(qlayer)];
         tmp = fopen([DIR, '\\trc\\', file_name, '.txt'], 'w');
         % read parameter set
-        for i = 1:8
+        for i = 1:2+ParamLines
             tline = fgetl(trace);
             fprintf(tmp, [tline, '\r\n']);
         end
@@ -128,14 +128,14 @@ for qlayer = MaxQid:-1:1
         
         % extract and decode
         fid = fopen('Extract.bat', 'w');
-        tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\', SEQ, int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
+        tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
         fprintf(fid, tline);
         tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
         fprintf(fid, tline);
         fclose(fid);
         !Extract.bat
         if (qlayer == MaxQid) %highest EL
-            ref_name = [SEQ, int2str(frame_num), '_dec'];
+            ref_name = ['Orig', int2str(frame_num), '-dec'];
         else
             ref_name = ['Discard_Group_t', int2str(tlayer), 'q', int2str(qlayer+1)];
         end
@@ -149,7 +149,7 @@ for qlayer = MaxQid:-1:1
             display(psnr);
             error_vector(:,frm) = error;
         end
-        save(['data\\', file_name, '-err.mat'], 'error_vector');
+        save(['data\\', DIR(5:end), int2str(frame_num), '-', file_name, '-err.mat'], 'error_vector');
     end
 
 end

@@ -1,9 +1,6 @@
-function Run(SEQ, frame_num)
-ErrorVector(SEQ, frame_num);
-priority_vector = ComputePriority(SEQ, frame_num);
-ExtractSubstreamTest(SEQ, frame_num, priority_vector);
-ExtractSubstreamQL(SEQ, frame_num);
-ExtractSubstreamBasic(SEQ, frame_num);
-CalculateRD(SEQ, frame_num);
-PlotDataRD(frame_num);
+function Run(DIR, frame_num)
+ErrorVector(DIR, frame_num);
+ComputePriority(DIR, frame_num);
+ObtainRD(DIR, frame_num);
+PlotDataRD(DIR,frame_num);
 end

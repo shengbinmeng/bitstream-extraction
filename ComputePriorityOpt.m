@@ -1,10 +1,10 @@
-function priority_vector = ComputePriorityOpt(SEQ, frame_num)
+function priority_vector = ComputePriorityOpt(DIR, frame_num)
 %
 
-DIR = ['..\\', SEQ];
 Width = 352;
 Height = 288;
 MaxQid = 2;
+ParamLine = 8;
 
 % for every SliceData packet(nalu) in the trace file, give it a priority num;
 % prefix nalu and base layer nalu can't be discarded, so they have priority
@@ -43,8 +43,8 @@ for i = 0:gop_num-1
 end
 packets(:,1) = (MaxQid:-1:1)';
 
-trace = fopen([DIR, '\\trc\\', SEQ, int2str(frame_num), '.txt'], 'r');
-for i = 1:8
+trace = fopen([DIR, '\\trc\\Orig', int2str(frame_num), '.txt'], 'r');
+for i = 1:2+ParamLine
     fgetl(trace);
 end
 
@@ -60,10 +60,10 @@ fclose(trace);
 %-------- Initialize the e_full matrix: -------------
 % Difference between reconstructional and original Y
 
-orig_file = [DIR, '\\yuv\\', SEQ, '.yuv'];
+orig_file = [DIR, '\\yuv\\Orig.yuv'];
 orig = ReadYUV(orig_file, Width, Height, 0, frame_num);
 
-recon_file = [DIR, '\\yuv\\', SEQ, int2str(frame_num), '_dec.yuv'];
+recon_file = [DIR, '\\yuv\\Orig', int2str(frame_num), '-dec.yuv'];
 recon = ReadYUV(recon_file, Width, Height, 0, frame_num);
 recon_y = zeros(Width*Height, frame_num);
 orig_y = zeros(Width*Height, frame_num);
@@ -79,7 +79,7 @@ psnr_seq = mean(10*log10(255^2./mse_seq));
 
 discard_vector = zeros((2 + MaxQid)*frame_num,1);
 pri_data = fopen(['data\\', int2str(frame_num), 'pri-data-opt.txt'], 'w');
-trace = fopen([DIR, '\\trc\\', SEQ, int2str(frame_num), '.txt'], 'r');
+trace = fopen([DIR, '\\trc\\Orig', int2str(frame_num), '.txt'], 'r');
 for j = 1:MaxQid*frame_num
     phi_pkt = zeros(1, frame_num);
     psnr_pkt = zeros(1, frame_num);
@@ -93,7 +93,7 @@ for j = 1:MaxQid*frame_num
         next_discard_vector((ceil(packets(1, i)/MaxQid)-1)*MaxQid + 2 + packets(1, i)) = 1;
         next_trace = fopen([DIR, '\\trc\\next.txt'], 'w');
         fseek(trace, 0 , 'bof');
-        for k = 1:8
+        for k = 1:2+ParamLine
             line = fgetl(trace);
             fprintf(next_trace, [line, '\r\n']);
         end
@@ -106,26 +106,14 @@ for j = 1:MaxQid*frame_num
         fclose(next_trace);
         
         fid = fopen('ExtractOpt.bat', 'w');
-        tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\', SEQ, int2str(frame_num), '.264 ', DIR, '\\str\\next.264 -et ', DIR, '\\trc\\next.txt \r\n'];
+        tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\next.264 -et ', DIR, '\\trc\\next.txt \r\n'];
         fprintf(fid, tline);
         tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\next.264 ', DIR, '\\yuv\\next.yuv \r\n'];
         fprintf(fid, tline);
         fclose(fid);
         !ExtractOpt.bat
         
-        ori_yuv = ReadYUV(orig_file, Width, Height, 0, frame_num);
-        rec_yuv = ReadYUV([DIR, '\\yuv\\next.yuv'], Width, Height, 0, frame_num);
-        ori_y = [];
-        rec_y = [];
-        ori_y = [ori_y ori_yuv.Y];
-        rec_y = [rec_y rec_yuv.Y];
-
-        mse = mean((double(rec_y) - double(ori_y)).^2);
-        psnr_frames = 10*log10(255^2./mse);
-        psnr_frames(psnr_frames == Inf) = 99.99;
-        psnr = mean(psnr_frames);
         psnr_pkt(i) = PSNR(orig_file, [DIR, '\\yuv\\next.yuv'], Width, Height, frame_num);
-        psnr_pkt(i) = psnr;
         delta_psnr = psnr_seq - psnr_pkt(i);
         delta_r = pkt_length(packets(1,i));
         phi_pkt(i) = abs(delta_psnr)/(delta_r/1000.0);

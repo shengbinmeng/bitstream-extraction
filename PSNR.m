@@ -9,7 +9,7 @@ rec_y = [rec_y rec_yuv.Y];
 
 mse = mean((double(rec_y) - double(ori_y)).^2);
 psnr_frames = 10*log10(255^2./mse);
-psnr_frames(psnr_frames == Inf) = 99.99;
+psnr_frames(psnr_frames == Inf) = 99;
 psnr = mean(psnr_frames);
 
 end

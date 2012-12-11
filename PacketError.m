@@ -1,17 +1,19 @@
-function packet_error = PacketError(pkt_idx, gop_num)
+function packet_error = PacketError(DIR, frame_num, pkt_idx, gop_num)
 %
 % pkt_idx is the index of the packet in the whold sequence;
 % gop_num is the returned packet_error's size (will cover how many gops counting from
 % the gop of the packet);
 
+
 MaxQid = 2;
 Width = 352;
 Height = 288;
+
 if (pkt_idx <= 2)
     qid = MaxQid - mod(pkt_idx, MaxQid);
     file_name = ['Discard_Group_t0q', int2str(qid), '_even'];
     error_vector = [];
-    load(['data\\', file_name, '-err.mat'], 'error_vector');
+    load(['data\\', DIR(5:end), int2str(frame_num), '-', file_name, '-err.mat'], 'error_vector');
     packet_error = zeros(Width*Height, 8*gop_num);
     packet_error(:,1:8) = error_vector(:,1:8);
     return;
@@ -52,7 +54,7 @@ else
 end
 
 error_vector = [];
-load(['data\\', file_name, '-err.mat'], 'error_vector');
+load(['data\\', DIR(5:end), int2str(frame_num), '-', file_name, '-err.mat'], 'error_vector');
 packet_error = zeros(Width*Height, 8*gop_num);
 offset = (gop_idx-1)*8 + 1;
 if (tid == 0)
