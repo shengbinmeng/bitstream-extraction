@@ -12,10 +12,10 @@ len = C{2};
 param_len = sum(len(1:ParamLines));
 len = len(ParamLines+1:end);
 
-for k = frame_num * MaxQid:-1:-1
+for k = frame_num * MaxQid:-1:0
     extract_bytes = sum(len(pri_vec > k)) + param_len;
-    %next_extract_bytes = sum(len(pri_vec >= k+1));
-    if (extract_bytes > target_bytes)
+    more_extract_bytes = sum(len(pri_vec > k-1)) + param_len;
+    if (abs(extract_bytes - target_bytes) <= abs(more_extract_bytes - target_bytes))
         break;
     end
 end
