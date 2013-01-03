@@ -26,6 +26,11 @@ gop_packets = ...
 [10	6	12	4	14	8	16	2;
  9	5	11	3	13	7	15	1];
 %}
+%{
+gop_packets = ...
+[10	6	12	4	14	8	16	2;
+ 9	5	11	3	13	7	15	1];
+%}
 gop_num = (frame_num - 1)/8;
 global g_packets;
 g_packets = zeros(MaxQid, frame_num);

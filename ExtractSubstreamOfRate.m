@@ -19,7 +19,7 @@ for k = frame_num * MaxQid:-1:-1
         break;
     end
 end
-%k = k + 1; % ensure extract_bytes < target_bytes
+%k = k + 1; % ensure extract_bytes < target_bytes; maybe no need
 
 trc_ext = fopen([DIR, '\\trc\\extract-mine\\Orig', int2str(frame_num), '-ext', int2str(target_bytes) ,'bytes.txt'], 'w');
 fseek(trc_ori, 0, 'bof');

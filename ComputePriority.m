@@ -138,7 +138,7 @@ for j = 1:MaxQid*frame_num
     % use sum of mse
     %mse_seq = sum(mse_seq);
     
-    packets(1:MaxQid-1, min_idx) = packets(2:MaxQid, min_idx);
+    packets(1:MaxQid-1, min_idx) = packets(2:MaxQid, min_idx); 
     packets(MaxQid, min_idx) = 0;
 end
 
