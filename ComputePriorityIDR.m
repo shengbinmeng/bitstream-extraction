@@ -35,6 +35,8 @@ for i = 0:gop_num-1
     packets(:,i*8+2:i*8+9) = gop_packets + i * MaxQid*8 + MaxQid;
 end
 packets(:,1) = (MaxQid:-1:1)';
+packets_backup = packets;
+packets_phi = zeros(MaxQid, frame_num);
 
 trace = fopen([DIR, '\\trc\\Orig', int2str(frame_num), '.txt'], 'r');
 for i = 1:2+ParamLines
@@ -53,14 +55,15 @@ idr_frame_num = IDRPeriod + 1;
 idr_num = (frame_num - 1) / IDRPeriod;
 for idr_index = 1:idr_num
     frames_skip = (idr_index-1)*IDRPeriod;
-
+    packets(:,1+frames_skip) = packets_backup(:,1+frames_skip);
+    
     recon_file = [DIR, '\\yuv\\Orig', int2str(frame_num), '-dec.yuv'];
     recon = ReadYUV(recon_file, Width, Height, frames_skip, idr_frame_num);
     orig_file = [DIR, '\\yuv\\Orig.yuv'];
     orig = ReadYUV(orig_file, Width, Height, frames_skip, idr_frame_num);
     recon_y = zeros(Width*Height, idr_frame_num);
     orig_y = zeros(Width*Height, idr_frame_num);
-    for i = 1:frame_num
+    for i = 1:idr_frame_num
         recon_y(:,i) = recon(i).Y;
         orig_y(:,i) = orig(i).Y;
     end
@@ -90,8 +93,8 @@ for idr_index = 1:idr_num
                 gop_idx = ceil((i-1) / 8);
                 offset = (gop_idx-1)*8 + 1;
                 affect_frames = 15;
-                if (offset + affect_frames > frame_num)
-                    affect_frames = frame_num - offset;
+                if (offset + affect_frames > idr_frame_num)
+                    affect_frames = idr_frame_num - offset;
                 end
             end
 
@@ -117,6 +120,12 @@ for idr_index = 1:idr_num
         display([min_phi, packets(1, min_idx+frames_skip)]);
 
         phi_vector((ceil(packets(1, min_idx+frames_skip)/MaxQid)-1)*2 + 2 + packets(1, min_idx+frames_skip)) = min_phi;
+        if (packets(2, min_idx+frames_skip) == 0)
+            packets_phi(2, min_idx + frames_skip) = min_phi;
+        else
+            packets_phi(1, min_idx + frames_skip) = min_phi;
+        end
+        
 
         packet_error =  PacketError(DIR, frame_num, packets(1,min_idx+frames_skip), 2);
         if (min_idx == 1)
@@ -126,8 +135,8 @@ for idr_index = 1:idr_num
             gop_idx = ceil((min_idx-1) / 8);
             offset = (gop_idx-1)*8 + 1;
             affect_frames = 15;
-            if (offset + affect_frames > frame_num)
-                affect_frames = frame_num - offset;
+            if (offset + affect_frames > idr_frame_num)
+                affect_frames = idr_frame_num - offset;
             end
         end
         e_pkt = zeros(Width * Height, idr_frame_num);
@@ -146,6 +155,16 @@ for idr_index = 1:idr_num
     end
 end
 
-save(['data\\', DIR(5:end), int2str(frame_num), '-priority-vector.mat'], 'phi_vector');
+priority_vector = phi_vector;
+for i = 1:frame_num*MaxQid
+    [min_value min_idx] = min(packets_phi(1,:));
+    priority_vector((ceil(packets_backup(1, min_idx)/MaxQid)-1)*2 + 2 + packets_backup(1, min_idx)) = i;
+    packets_phi(1:MaxQid-1,min_idx) = packets_phi(2:MaxQid,min_idx);
+    packets_phi(MaxQid, min_idx) = Inf;
+    packets_backup(1:MaxQid-1,min_idx) = packets_backup(2:MaxQid,min_idx);
+    packets_backup(MaxQid, min_idx) = 0;
+end
+
+save(['data\\', DIR(5:end), int2str(frame_num), '-priority-vector.mat'], 'priority_vector');
 %fclose(pri_data);
 end
