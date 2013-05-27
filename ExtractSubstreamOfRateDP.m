@@ -50,7 +50,7 @@ param_len = sum(len(1:ParamLines));
 len = len(ParamLines+1:end);
 
 basic_len = param_len + sum(len(1:(2 + MaxQid):end)) + sum(len(2:(2 + MaxQid):end));
-enhence_len = target_bytes - basic_len;
+enhance_len = target_bytes - basic_len;
 
 lines = zeros(frame_num*MaxQid, 1);
 for i = 0:frame_num-1
@@ -63,7 +63,7 @@ global g_select;
 global g_packet_num;
 g_packet_num = MaxQid*frame_num;
 g_select = zeros(g_packet_num, 1);
-OptValue(g_packet_num, enhence_len);
+OptValue(g_packet_num, enhance_len);
 
 trc_ext = fopen([DIR, '\\trc\\extract-mine\\Orig', int2str(frame_num), '-ext', int2str(target_bytes) ,'bytes.txt'], 'w');
 fseek(trc_ori, 0, 'bof');
