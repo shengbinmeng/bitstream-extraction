@@ -9,13 +9,13 @@ psnr_basic = C{4};
 
 figure;
 set(gca,'Fontsize',20);
-plot(bitrate, psnr_mine, 'rx-');
+plot(bitrate, psnr_mine, 'ro-', 'MarkerSize', 12);
 xlabel('Bitrate (kbit/s)');
 ylabel('PSNR (dB)');
 title(DIR(5:end));
 hold on
-plot(bitrate, psnr_ql, 'bx-');
-plot(bitrate, psnr_basic, 'kx-');
+plot(bitrate, psnr_ql, 'b.-', 'MarkerSize', 20);
+plot(bitrate, psnr_basic, 'kv-','MarkerSize', 12);
 legend('Proposed', 'JSVM QL', 'JSVM Basic', 4);
 grid on;
 s = sprintf('improvement(ql, basic)\r\nmax: %.2f, %0.2f; min: %.2f, %.2f; mean: %.2f, %.2f\r\n', max(psnr_mine - psnr_ql), max(psnr_mine - psnr_basic), min(psnr_mine - psnr_ql), min(psnr_mine - psnr_basic), mean(psnr_mine - psnr_ql), mean(psnr_mine - psnr_basic));
