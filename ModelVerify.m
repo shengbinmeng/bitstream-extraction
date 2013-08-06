@@ -7,6 +7,7 @@ MaxQid = 2;
 Width = 352;
 Height = 288;
 ParamLine = 6;
+BIN_PATH = '..\\bin';
 
 fid_out = fopen(['result\\model-verify@', datestr(now, 'yyyymmddHHMMSS'), '.txt'], 'w');
 for v0 = 1:MaxQid
@@ -146,9 +147,9 @@ for v0 = 1:MaxQid
                                 
                                 % decode and compare
                                 fid = fopen('Extract.bat', 'w');
-                                tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
+                                tline = [BIN_PATH, '\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
                                 fprintf(fid, tline);
-                                tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
+                                tline = [BIN_PATH, '\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
                                 fprintf(fid, tline);
                                 fclose(fid);
                                 

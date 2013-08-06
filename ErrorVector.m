@@ -9,6 +9,7 @@ Height = 288;
 MaxQid = 2;
 MaxTid = 3;
 ParamLines = 6;
+BIN_PATH = '..\\bin';
 
 for qlayer = MaxQid:-1:1
     fseek(trace, 0, 'bof');
@@ -52,9 +53,9 @@ for qlayer = MaxQid:-1:1
     
     % extract and decode
     fid = fopen('Extract.bat', 'w');
-    tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
+    tline = [BIN_PATH, '\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
     fprintf(fid, tline);
-    tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
+    tline = [BIN_PATH, '\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
     fprintf(fid, tline);
     fclose(fid);
     !Extract.bat
@@ -79,9 +80,9 @@ for qlayer = MaxQid:-1:1
 
     % extract and decode
     fid = fopen('Extract.bat', 'w');
-    tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name1, '.264 -et ', DIR, '\\trc\\', file_name1, '.txt \r\n',];
+    tline = [BIN_PATH, '\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name1, '.264 -et ', DIR, '\\trc\\', file_name1, '.txt \r\n',];
     fprintf(fid, tline);
-    tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name1, '.264 ', DIR, '\\yuv\\', file_name1, '.yuv \r\n'];
+    tline = [BIN_PATH, '\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name1, '.264 ', DIR, '\\yuv\\', file_name1, '.yuv \r\n'];
     fprintf(fid, tline);
     fclose(fid);
     !Extract.bat
@@ -128,9 +129,9 @@ for qlayer = MaxQid:-1:1
         
         % extract and decode
         fid = fopen('Extract.bat', 'w');
-        tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
+        tline = [BIN_PATH, '\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
         fprintf(fid, tline);
-        tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
+        tline = [BIN_PATH, '\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
         fprintf(fid, tline);
         fclose(fid);
         !Extract.bat

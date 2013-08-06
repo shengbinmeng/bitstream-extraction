@@ -5,6 +5,7 @@ Width = 352;
 Height = 288;
 MaxQid = 2;
 ParamLine = 8;
+BIN_PATH = '..\\bin';
 
 % for every SliceData packet(nalu) in the trace file, give it a priority num;
 % prefix nalu and base layer nalu can't be discarded, so they have priority
@@ -106,9 +107,9 @@ for j = 1:MaxQid*frame_num
         fclose(next_trace);
         
         fid = fopen('ExtractOpt.bat', 'w');
-        tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\next.264 -et ', DIR, '\\trc\\next.txt \r\n'];
+        tline = [BIN_PATH, '\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\next.264 -et ', DIR, '\\trc\\next.txt \r\n'];
         fprintf(fid, tline);
-        tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\next.264 ', DIR, '\\yuv\\next.yuv \r\n'];
+        tline = [BIN_PATH, '\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\next.264 ', DIR, '\\yuv\\next.yuv \r\n'];
         fprintf(fid, tline);
         fclose(fid);
         !ExtractOpt.bat
