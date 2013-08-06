@@ -16,6 +16,7 @@ ydata(:) = d_actual;
 fun = @(p,xdata) xdata(:,1)+xdata(:,2)+2*p*(xdata(:,1).*xdata(:,2)).^0.5;
 options = optimset('LargeScale', 'off');
 [p,resnorm,residual,exitflag,output] = lsqcurvefit(fun, 0, xdata, ydata, 0, 1, options);
+%{
 x = (0:0.2:20)*10e4;
 y = (0:0.2:20)*10e4;
 [X Y] = meshgrid(x, y);
@@ -25,7 +26,7 @@ surf(x, y, z);
 hold on
 scatter3(xdata(:,1), xdata(:,2), ydata);
 hold off
-
+%}
 k_param = p;
 display(p);
 end

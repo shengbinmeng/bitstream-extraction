@@ -3,8 +3,14 @@ function priority_vector = ComputePriority(DIR, frame_num)
 
 Width = 352;
 Height = 288;
-MaxQid = 5;
+MaxQid = 2;
 ParamLine = 6;
+pos = strfind(DIR, '\');
+a = length(pos);
+if(a ~= 0) 
+    a = pos(a);
+end
+last_folder = DIR(a+1 : end);
 
 % for every SliceData packet(nalu) in the trace file, give it a priority num;
 % prefix nalu and base layer nalu can't be discarded, so they have priority
@@ -67,10 +73,10 @@ for j = 1:MaxQid*frame_num
         mse_seq = sum(distortion_seq);
         mse_pkt = sum(distortion_pkt);
         delta_d = mse_seq - mse_pkt;
-        delta_r = pkt_length(packets(7 - select_map_next(i),i));
+        delta_r = pkt_length(packets(MaxQid+2 - select_map_next(i),i));
         phi_pkt(i) = abs(delta_d)/(delta_r/1000);
         
-        fprintf(pri_data, '%d %d %f %f %f %d %f \r\n', i, packets(7 - select_map_next(i),i), mse_seq, mse_pkt, delta_d, delta_r, phi_pkt(i));
+        fprintf(pri_data, '%d %d %f %f %f %d %f \r\n', i, packets(MaxQid+2 - select_map_next(i),i), mse_seq, mse_pkt, delta_d, delta_r, phi_pkt(i));
     end
 
     [the_phi, the_idx] = max(phi_pkt);
@@ -79,14 +85,14 @@ for j = 1:MaxQid*frame_num
     end
     select_map(the_idx) = select_map(the_idx) + 1;
     
-    display([the_phi, packets(7 - select_map(the_idx), the_idx)]);
+    display([the_phi, packets(MaxQid+2 - select_map(the_idx), the_idx)]);
     
-    discard_order = cat(2, discard_order, packets(7 - select_map(the_idx), the_idx));
-    priority_vector(ceil(packets(7 - select_map(the_idx), the_idx)/MaxQid)*2 + packets(7 - select_map(the_idx), the_idx)) = MaxQid*frame_num+1 - j;
+    discard_order = cat(2, discard_order, packets(MaxQid+2 - select_map(the_idx), the_idx));
+    priority_vector(ceil(packets(MaxQid+2 - select_map(the_idx), the_idx)/MaxQid)*2 + packets(MaxQid+2 - select_map(the_idx), the_idx)) = MaxQid*frame_num+1 - j;
 
     distortion_seq = EstimateDistortion(select_map, frame_num);
 end
 
-save(['data\\', int2str(frame_num), 'pri-vec.mat'], 'priority_vector', 'discard_order');
+save(['data\\', last_folder, int2str(frame_num), '-priority-vector.mat'], 'priority_vector', 'discard_order');
 fclose(pri_data);
 end

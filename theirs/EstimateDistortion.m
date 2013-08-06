@@ -1,7 +1,7 @@
 function distortion = EstimateDistortion(selection_map, frame_num)
 
 MaxTid = 3;
-MaxQid = 5;
+MaxQid = 2;
 Width = 352;
 Height = 288;
 data = load('data\\self-distortion.mat');

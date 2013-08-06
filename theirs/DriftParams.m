@@ -21,6 +21,7 @@ for i =1:frame_num
     options = optimset('LargeScale', 'off');
     [p,resnorm,residual,exitflag,output] = lsqcurvefit(fun, [-0.3 1.2 1 1 1], xdata, ydata, [], [], options);
     param(:,i) = p';
+    %{
     x = (0:0.2:20)*10e4;
     y = (0:0.2:20)*10e4;
     [X Y] = meshgrid(x, y);
@@ -30,6 +31,7 @@ for i =1:frame_num
     hold on
     scatter3(xdata(:,1), xdata(:,2), ydata);
     hold off
+    %}
 end
 drift_params = param;
 save('data\\drift-params.mat', 'drift_params');

@@ -7,7 +7,14 @@ ParamLines = 6;
 MaxQid = 2;
 BIN_PATH = '..\\bin';
 
-data = load(['data\\', DIR(5:end), int2str(frame_num), '-priority-vector.mat']);
+pos = strfind(DIR, '\');
+a = length(pos);
+if(a ~= 0) 
+    a = pos(a);
+end
+last_folder = DIR(a+1 : end);
+
+data = load(['data\\', last_folder, int2str(frame_num), '-priority-vector.mat']);
 pri_vec = data.priority_vector;
 
 trc_ori = fopen([DIR, '\\trc\\Orig', int2str(frame_num), '.txt'], 'r');
@@ -28,7 +35,7 @@ num = 10;
 psnr_mine = zeros(num, 1);
 psnr_ql = zeros(num, 1);
 psnr_basic = zeros(num, 1);
-rd_data = fopen(['data\\', DIR(5:end), int2str(frame_num), '-rd-data.txt'], 'w');
+rd_data = fopen(['data\\', last_folder, int2str(frame_num), '-rd-data.txt'], 'w');
 ori_yuv = [DIR, '\\yuv\Orig.yuv'];
 
 for k = 1:1:num

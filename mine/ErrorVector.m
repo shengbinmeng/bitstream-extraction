@@ -11,6 +11,13 @@ MaxTid = 3;
 ParamLines = 6;
 BIN_PATH = '..\\bin';
 
+pos = strfind(DIR, '\');
+a = length(pos);
+if(a ~= 0) 
+    a = pos(a);
+end
+last_folder = DIR(a+1 : end);
+
 for qlayer = MaxQid:-1:1
     fseek(trace, 0, 'bof');
     file_name = ['Discard_Group_t0q', int2str(qlayer), '_odd'];
@@ -75,7 +82,7 @@ for qlayer = MaxQid:-1:1
         display(psnr);
         error_vector(:,frm) = error;
     end
-    save(['data\\', DIR(5:end), int2str(frame_num), '-', file_name, '-err.mat'], 'error_vector');
+    save(['data\\', last_folder, int2str(frame_num), '-', file_name, '-err.mat'], 'error_vector');
     
 
     % extract and decode
@@ -102,7 +109,7 @@ for qlayer = MaxQid:-1:1
         display(psnr);
         error_vector(:,frm) = error;
     end
-    save(['data\\', DIR(5:end), int2str(frame_num), '-', file_name1, '-err.mat'], 'error_vector');
+    save(['data\\', last_folder, int2str(frame_num), '-', file_name1, '-err.mat'], 'error_vector');
     
     
     for tlayer = 1:MaxTid
@@ -150,7 +157,7 @@ for qlayer = MaxQid:-1:1
             display(psnr);
             error_vector(:,frm) = error;
         end
-        save(['data\\', DIR(5:end), int2str(frame_num), '-', file_name, '-err.mat'], 'error_vector');
+        save(['data\\', last_folder, int2str(frame_num), '-', file_name, '-err.mat'], 'error_vector');
     end
 
 end

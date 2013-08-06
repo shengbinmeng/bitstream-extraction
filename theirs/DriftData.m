@@ -4,12 +4,13 @@ TemporalLevelPos = 28;
 QualityLevelPos = 33;
 Width = 352;
 Height = 288;
-MaxQid = 5;
+MaxQid = 2;
 MaxTid = 3;
 ParamLines = 6;
 SampleNum = 20;
+BIN_PATH = '..\\bin';
 
-data = zeros(3, frame_num, SampleNum);  % 
+data = zeros(3, frame_num, SampleNum);
 trace = fopen([DIR, '\\trc\\Orig', int2str(frame_num), '.txt'], 'r');
 for tlayer = MaxTid:-1:1
     for k = 1:SampleNum
@@ -40,9 +41,9 @@ for tlayer = MaxTid:-1:1
 
         % extract and decode
         fid = fopen('Extract.bat', 'w');
-        tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
+        tline = [BIN_PATH, '\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
         fprintf(fid, tline);
-        tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
+        tline = [BIN_PATH, '\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
         fprintf(fid, tline);
         fclose(fid);
         !Extract.bat

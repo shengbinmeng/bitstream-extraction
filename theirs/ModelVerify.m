@@ -4,7 +4,8 @@ Width = 352;
 Height = 288;
 SampleNum = 1;
 ParamLines = 6;
-MaxQid = 5;
+MaxQid = 2;
+BIN_PATH = '..\\bin';
 
 trace = fopen([DIR, '\\trc\\Orig', int2str(frame_num), '.txt'], 'r');
 select_map = zeros(1, frame_num);
@@ -48,9 +49,9 @@ for k = 1:SampleNum
     d_estimate = EstimateDistortion(select_map, frame_num);
     % extract and decode
     fid = fopen('Extract.bat', 'w');
-    tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
+    tline = [BIN_PATH, '\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
     fprintf(fid, tline);
-    tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
+    tline = [BIN_PATH, '\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
     fprintf(fid, tline);
     fclose(fid);
     !Extract.bat

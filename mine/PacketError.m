@@ -9,11 +9,18 @@ MaxQid = 2;
 Width = 352;
 Height = 288;
 
+pos = strfind(DIR, '\');
+a = length(pos);
+if(a ~= 0) 
+    a = pos(a);
+end
+last_folder = DIR(a+1 : end);
+
 if (pkt_idx <= 2)
     qid = MaxQid - mod(pkt_idx, MaxQid);
     file_name = ['Discard_Group_t0q', int2str(qid), '_even'];
     error_vector = [];
-    load(['data\\', DIR(5:end), int2str(frame_num), '-', file_name, '-err.mat'], 'error_vector');
+    load(['data\\', last_folder, int2str(frame_num), '-', file_name, '-err.mat'], 'error_vector');
     packet_error = zeros(Width*Height, 8*gop_num);
     packet_error(:,1:8) = error_vector(:,1:8);
     return;
@@ -54,7 +61,7 @@ else
 end
 
 error_vector = [];
-load(['data\\', DIR(5:end), int2str(frame_num), '-', file_name, '-err.mat'], 'error_vector');
+load(['data\\', last_folder, int2str(frame_num), '-', file_name, '-err.mat'], 'error_vector');
 packet_error = zeros(Width*Height, 8*gop_num);
 offset = (gop_idx-1)*8 + 1;
 if (tid == 0)

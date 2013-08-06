@@ -6,6 +6,13 @@ Height = 288;
 MaxQid = 2;
 ParamLines = 6;
 
+pos = strfind(DIR, '\');
+a = length(pos);
+if(a ~= 0) 
+    a = pos(a);
+end
+last_folder = DIR(a+1 : end);
+
 % for every SliceData packet(nalu) in the trace file, give it a priority num;
 % prefix nalu and base layer nalu can't be discarded, so they have priority
 % of Inf.
@@ -67,7 +74,7 @@ mse_seq = mean(e_seq.^2);
 psnr_seq = 10*log10(255^2./mse_seq);
 psnr_seq(psnr_seq > 99) = 99;
 psnr_seq = mean(psnr_seq);
-%pri_data = fopen(['data\\', DIR(5:end), int2str(frame_num), '-pri-data.txt'], 'w');
+%pri_data = fopen(['data\\', last_folder, int2str(frame_num), '-pri-data.txt'], 'w');
 for j = 1:MaxQid*frame_num
     phi_pkt = zeros(1, frame_num);
     
@@ -142,6 +149,6 @@ for j = 1:MaxQid*frame_num
     packets(MaxQid, min_idx) = 0;
 end
 
-save(['data\\', DIR(5:end), int2str(frame_num), '-priority-vector.mat'], 'priority_vector', 'discard_order');
+save(['data\\', last_folder, int2str(frame_num), '-priority-vector.mat'], 'priority_vector', 'discard_order');
 %fclose(pri_data);
 end
