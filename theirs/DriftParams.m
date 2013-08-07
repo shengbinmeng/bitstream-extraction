@@ -1,8 +1,15 @@
-function drift_params = DriftParams(frame_num)
+function drift_params = DriftParams(DIR, frame_num)
 
-data = load('data\\drift-data.mat');
+pos = strfind(DIR, '\');
+a = length(pos);
+if(a ~= 0) 
+    a = pos(a);
+end
+last_folder = DIR(a+1 : end);
+
+data = load(['data\\', last_folder, int2str(frame_num), '-drift-data.mat']);
 drift_data = data.drift_data;
-sample_num = 20;
+sample_num = 50;
 if (sample_num>size(drift_data,3))
     sample_num = size(drift_data,3);
 end;
@@ -21,18 +28,16 @@ for i =1:frame_num
     options = optimset('LargeScale', 'off');
     [p,resnorm,residual,exitflag,output] = lsqcurvefit(fun, [-0.3 1.2 1 1 1], xdata, ydata, [], [], options);
     param(:,i) = p';
-    %{
+    
     x = (0:0.2:20)*10e4;
     y = (0:0.2:20)*10e4;
     [X Y] = meshgrid(x, y);
     z = p(1)*X + p(2)*Y + p(3)*X.^2 + p(4)*Y.^2 + p(5)*X.*Y;
-    %figure;
     surf(x, y, z);
     hold on
     scatter3(xdata(:,1), xdata(:,2), ydata);
     hold off
-    %}
 end
 drift_params = param;
-save('data\\drift-params.mat', 'drift_params');
+save(['data\\', last_folder, int2str(frame_num), '-drift-params.mat'], 'drift_params');
 end

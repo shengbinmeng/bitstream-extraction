@@ -5,6 +5,7 @@ Width = 352;
 Height = 288;
 MaxQid = 2;
 ParamLine = 6;
+
 pos = strfind(DIR, '\');
 a = length(pos);
 if(a ~= 0) 
@@ -56,9 +57,9 @@ end
 pkt_length = C{2}(lines, 1);
 fclose(trace);
 
-pri_data = fopen(['data\\', int2str(frame_num), 'pri-data.txt'], 'w');
+%pri_data = fopen(['data\\', last_folder, int2str(frame_num), '-pri-data.txt'], 'w');
 select_map = ones(1, frame_num);
-distortion_seq = EstimateDistortion(select_map, frame_num);
+distortion_seq = EstimateDistortion(DIR, select_map, frame_num);
 for j = 1:MaxQid*frame_num
     phi_pkt = zeros(1, frame_num);
     for i = 1:frame_num
@@ -69,14 +70,14 @@ for j = 1:MaxQid*frame_num
         end
         
         select_map_next(i) = select_map(i) + 1;
-        distortion_pkt = EstimateDistortion(select_map_next, frame_num);
+        distortion_pkt = EstimateDistortion(DIR, select_map_next, frame_num);
         mse_seq = sum(distortion_seq);
         mse_pkt = sum(distortion_pkt);
         delta_d = mse_seq - mse_pkt;
         delta_r = pkt_length(packets(MaxQid+2 - select_map_next(i),i));
         phi_pkt(i) = abs(delta_d)/(delta_r/1000);
         
-        fprintf(pri_data, '%d %d %f %f %f %d %f \r\n', i, packets(MaxQid+2 - select_map_next(i),i), mse_seq, mse_pkt, delta_d, delta_r, phi_pkt(i));
+        %fprintf(pri_data, '%d %d %f %f %f %d %f \r\n', i, packets(MaxQid+2 - select_map_next(i),i), mse_seq, mse_pkt, delta_d, delta_r, phi_pkt(i));
     end
 
     [the_phi, the_idx] = max(phi_pkt);
@@ -90,9 +91,9 @@ for j = 1:MaxQid*frame_num
     discard_order = cat(2, discard_order, packets(MaxQid+2 - select_map(the_idx), the_idx));
     priority_vector(ceil(packets(MaxQid+2 - select_map(the_idx), the_idx)/MaxQid)*2 + packets(MaxQid+2 - select_map(the_idx), the_idx)) = MaxQid*frame_num+1 - j;
 
-    distortion_seq = EstimateDistortion(select_map, frame_num);
+    distortion_seq = EstimateDistortion(DIR, select_map, frame_num);
 end
 
 save(['data\\', last_folder, int2str(frame_num), '-priority-vector.mat'], 'priority_vector', 'discard_order');
-fclose(pri_data);
+%fclose(pri_data);
 end

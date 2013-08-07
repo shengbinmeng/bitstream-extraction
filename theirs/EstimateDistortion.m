@@ -1,12 +1,20 @@
-function distortion = EstimateDistortion(selection_map, frame_num)
+function distortion = EstimateDistortion(DIR, selection_map, frame_num)
 
 MaxTid = 3;
 MaxQid = 2;
 Width = 352;
 Height = 288;
-data = load('data\\self-distortion.mat');
+
+pos = strfind(DIR, '\');
+a = length(pos);
+if(a ~= 0) 
+    a = pos(a);
+end
+last_folder = DIR(a+1 : end);
+
+data = load(['data\\', last_folder, int2str(frame_num), '-self-distortion.mat']);
 self_distortion = data.self_distortion;
-data = load('data\\drift-params.mat');
+data = load(['data\\', last_folder, int2str(frame_num), '-drift-params.mat']);
 drift_params = data.drift_params;
 %selection_map = zeros(1, frame_num);
 self_part = zeros(1, frame_num);
@@ -75,5 +83,5 @@ end
 distortion_mse = total_distortion/(Width*Height);
 %distortion_psnr = 10*log10(255^2 ./ distortion_mse);
 distortion = distortion_mse;
-save('data\\part.mat', 'self_part', 'drift_part');
+save(['data\\', last_folder, int2str(frame_num), '-part.mat'], 'self_part', 'drift_part');
 end

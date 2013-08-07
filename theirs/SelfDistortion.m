@@ -9,6 +9,13 @@ MaxTid = 3;
 ParamLines = 6;
 BIN_PATH = '..\\bin';
 
+pos = strfind(DIR, '\');
+a = length(pos);
+if(a ~= 0) 
+    a = pos(a);
+end
+last_folder = DIR(a+1 : end);
+
 trace = fopen([DIR, '\\trc\\Orig', int2str(frame_num), '.txt'], 'r');
 
 self_distortion = zeros(MaxQid+1, frame_num);
@@ -68,4 +75,4 @@ for tlayer = 0:MaxTid
     end 
 end
 
-save('data\\self-distortion.mat', 'self_distortion');
+save(['data\\', last_folder, int2str(frame_num), '-self-distortion.mat'], 'self_distortion');

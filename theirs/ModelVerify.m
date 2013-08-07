@@ -7,6 +7,13 @@ ParamLines = 6;
 MaxQid = 2;
 BIN_PATH = '..\\bin';
 
+pos = strfind(DIR, '\');
+a = length(pos);
+if(a ~= 0) 
+    a = pos(a);
+end
+last_folder = DIR(a+1 : end);
+
 trace = fopen([DIR, '\\trc\\Orig', int2str(frame_num), '.txt'], 'r');
 select_map = zeros(1, frame_num);
 decode_to_display = [1 9 5 3 2 4 7 6 8];
@@ -78,5 +85,5 @@ for k = 1:SampleNum
     display(s);
 end
     d_actual = d_actual*(Width*Height);
-    save('data\\actual.mat', 'd_actual');
+    save(['data\\', last_folder, int2str(frame_num), '-actual.mat'], 'd_actual');
 end

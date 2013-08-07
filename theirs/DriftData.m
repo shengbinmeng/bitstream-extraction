@@ -7,8 +7,15 @@ Height = 288;
 MaxQid = 2;
 MaxTid = 3;
 ParamLines = 6;
-SampleNum = 20;
+SampleNum = 50;
 BIN_PATH = '..\\bin';
+
+pos = strfind(DIR, '\');
+a = length(pos);
+if(a ~= 0) 
+    a = pos(a);
+end
+last_folder = DIR(a+1 : end);
 
 data = zeros(3, frame_num, SampleNum);
 trace = fopen([DIR, '\\trc\\Orig', int2str(frame_num), '.txt'], 'r');
@@ -89,5 +96,5 @@ for tlayer = MaxTid:-1:1
 end
 fclose(trace);
 drift_data = data;
-save('data\\drift-data.mat', 'drift_data');
+save(['data\\', last_folder, int2str(frame_num), '-drift-data.mat'], 'drift_data');
 end
