@@ -50,7 +50,7 @@ for k = 1:1:num
     tline = [BIN_PATH, '\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\extract-mine\\', file_name, '.264 ', DIR, '\\yuv\\extract-mine\\', file_name, '.yuv \r\n'];
     fprintf(fid, tline);
     
-    tline = [BIN_PATH, '\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '-ql.264 ', DIR, '\\str\\extract-ql\\', file_name, '.264 -r ', int2str(uint16((k-1)/(num-1)*100)), '%%%% -ql\r\n'];
+    tline = [BIN_PATH, '\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '-ql-noref.264 ', DIR, '\\str\\extract-ql\\', file_name, '.264 -r ', int2str(uint16((k-1)/(num-1)*100)), '%%%% -ql\r\n'];
     fprintf(fid, tline);
     tline = [BIN_PATH, '\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\extract-ql\\', file_name, '.264 ', DIR, '\\yuv\\extract-ql\\', file_name, '.yuv \r\n'];
     fprintf(fid, tline);

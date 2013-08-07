@@ -9,7 +9,7 @@ last_folder = DIR(a+1 : end);
 
 data = load(['data\\', last_folder, int2str(frame_num), '-drift-data.mat']);
 drift_data = data.drift_data;
-sample_num = 50;
+sample_num = 20;
 if (sample_num>size(drift_data,3))
     sample_num = size(drift_data,3);
 end;

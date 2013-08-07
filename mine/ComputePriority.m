@@ -67,13 +67,16 @@ for i = 1:frame_num
     recon_y(:,i) = recon(i).Y;
     orig_y(:,i) = orig(i).Y;
 end
-e_seq = recon_y - orig_y;
+e_seq = recon_y - recon_y;
 clear recon recon_y orig orig_y
 
 mse_seq = mean(e_seq.^2);
-psnr_seq = 10*log10(255^2./mse_seq);
-psnr_seq(psnr_seq > 99) = 99;
-psnr_seq = mean(psnr_seq);
+% use psnr
+%psnr_seq = 10*log10(255^2./mse_seq);
+%psnr_seq(psnr_seq > 99) = 99;
+%psnr_seq = mean(psnr_seq);
+% use mse
+mse_seq = sum (mse_seq);
 %pri_data = fopen(['data\\', last_folder, int2str(frame_num), '-pri-data.txt'], 'w');
 for j = 1:MaxQid*frame_num
     phi_pkt = zeros(1, frame_num);
@@ -102,14 +105,14 @@ for j = 1:MaxQid*frame_num
         e_pkt(:,offset+1:offset+affect_frames) = packet_error(:,1:affect_frames);
         mse_pkt = mean((e_pkt + e_seq).^2);
         % use psnr
-        psnr_pkt = 10*log10(255^2./mse_pkt);
-        psnr_pkt(psnr_pkt > 99) = 99;
-        psnr_pkt = mean(psnr_pkt);
+        %psnr_pkt = 10*log10(255^2./mse_pkt);
+        %psnr_pkt(psnr_pkt > 99) = 99;
+        %psnr_pkt = mean(psnr_pkt);
         % use mse
-        %mse_pkt = sum(mse_pkt);
+        mse_pkt = sum(mse_pkt);
         
-        %delta_d = mse_pkt - mse_seq;
-        delta_d = psnr_seq - psnr_pkt;
+        delta_d = mse_pkt - mse_seq;
+        %delta_d = psnr_seq - psnr_pkt;
         delta_r = pkt_length(packets(1,i));
         phi_pkt(i) = abs(delta_d)/(delta_r/1000);
         
@@ -139,11 +142,11 @@ for j = 1:MaxQid*frame_num
     e_seq = e_seq + e_pkt;
     mse_seq = mean(e_seq.^2);
     % use psnr
-    psnr_seq = 10*log10(255^2./mse_seq);
-    psnr_seq(psnr_seq > 99) = 99;
-    psnr_seq = mean(psnr_seq);
+    %psnr_seq = 10*log10(255^2./mse_seq);
+    %psnr_seq(psnr_seq > 99) = 99;
+    %psnr_seq = mean(psnr_seq);
     % use sum of mse
-    %mse_seq = sum(mse_seq);
+    mse_seq = sum(mse_seq);
     
     packets(1:MaxQid-1, min_idx) = packets(2:MaxQid, min_idx); 
     packets(MaxQid, min_idx) = 0;

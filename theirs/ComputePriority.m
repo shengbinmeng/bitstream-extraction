@@ -58,38 +58,35 @@ pkt_length = C{2}(lines, 1);
 fclose(trace);
 
 %pri_data = fopen(['data\\', last_folder, int2str(frame_num), '-pri-data.txt'], 'w');
-select_map = ones(1, frame_num);
+select_map = ones(1, frame_num) * (1+MaxQid);
 distortion_seq = EstimateDistortion(DIR, select_map, frame_num);
 for j = 1:MaxQid*frame_num
     phi_pkt = zeros(1, frame_num);
     for i = 1:frame_num
         select_map_next = select_map;
-        if select_map(i) == (MaxQid+1)
-            phi_pkt(i) = -99;
+        select_map_next(i) = select_map(i) - 1;
+        if select_map_next(i) == 0
+            % next is base layer
+            phi_pkt(i) = Inf;
             continue;
         end
         
-        select_map_next(i) = select_map(i) + 1;
         distortion_pkt = EstimateDistortion(DIR, select_map_next, frame_num);
         mse_seq = sum(distortion_seq);
         mse_pkt = sum(distortion_pkt);
-        delta_d = mse_seq - mse_pkt;
-        delta_r = pkt_length(packets(MaxQid+2 - select_map_next(i),i));
+        delta_d = mse_pkt - mse_seq;
+        delta_r = pkt_length(packets(MaxQid+1 - select_map_next(i),i));
         phi_pkt(i) = abs(delta_d)/(delta_r/1000);
         
-        %fprintf(pri_data, '%d %d %f %f %f %d %f \r\n', i, packets(MaxQid+2 - select_map_next(i),i), mse_seq, mse_pkt, delta_d, delta_r, phi_pkt(i));
+        %fprintf(pri_data, '%d %d %f %f %f %d %f \r\n', i, packets(MaxQid+1 - select_map_next(i),i), mse_seq, mse_pkt, delta_d, delta_r, phi_pkt(i));
     end
 
-    [the_phi, the_idx] = max(phi_pkt);
-    if (abs(the_phi - 1.1236) < 0.0001)
-        display(1);
-    end
-    select_map(the_idx) = select_map(the_idx) + 1;
+    [the_phi, the_idx] = min(phi_pkt);
+    select_map(the_idx) = select_map(the_idx) - 1;
+    display([the_phi, packets(MaxQid+1 - select_map(the_idx), the_idx)]);
     
-    display([the_phi, packets(MaxQid+2 - select_map(the_idx), the_idx)]);
-    
-    discard_order = cat(2, discard_order, packets(MaxQid+2 - select_map(the_idx), the_idx));
-    priority_vector(ceil(packets(MaxQid+2 - select_map(the_idx), the_idx)/MaxQid)*2 + packets(MaxQid+2 - select_map(the_idx), the_idx)) = MaxQid*frame_num+1 - j;
+    discard_order = cat(2, discard_order, packets(MaxQid+1 - select_map(the_idx), the_idx));
+    priority_vector(ceil(packets(MaxQid+1 - select_map(the_idx), the_idx)/MaxQid)*2 + packets(MaxQid+1 - select_map(the_idx), the_idx)) = j;
 
     distortion_seq = EstimateDistortion(DIR, select_map, frame_num);
 end

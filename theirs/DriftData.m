@@ -7,7 +7,7 @@ Height = 288;
 MaxQid = 2;
 MaxTid = 3;
 ParamLines = 6;
-SampleNum = 50;
+SampleNum = 20;
 BIN_PATH = '..\\bin';
 
 pos = strfind(DIR, '\');

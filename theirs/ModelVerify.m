@@ -2,7 +2,7 @@ function ModelVerify(DIR, frame_num)
 
 Width = 352;
 Height = 288;
-SampleNum = 1;
+SampleNum = 20;
 ParamLines = 6;
 MaxQid = 2;
 BIN_PATH = '..\\bin';
@@ -46,14 +46,14 @@ for k = 1:SampleNum
             tline = fgetl(trace);
             fprintf(tmp, [tline, '\r\n']);
         end
-        for j=map_id:5
+        for j=map_id:MaxQid
             % discard
             tline = fgetl(trace);
         end
     end
     fclose(tmp);
 
-    d_estimate = EstimateDistortion(select_map, frame_num);
+    d_estimate = EstimateDistortion(DIR, select_map, frame_num);
     % extract and decode
     fid = fopen('Extract.bat', 'w');
     tline = [BIN_PATH, '\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
