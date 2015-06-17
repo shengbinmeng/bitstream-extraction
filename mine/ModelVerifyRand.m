@@ -9,7 +9,7 @@ Height = 288;
 ParamLines = 6;
 SampleNum = 1;
 BIN_PATH = '..\\bin';
-Has_ref = 0;
+has_ref = 0;
 
 gop_packets = zeros(MaxQid, 8);
 gop_packets(:, 8) = MaxQid:-1:1;
@@ -81,7 +81,7 @@ for k = 1:SampleNum
         recon_y(:,i) = recon(i).Y;
         orig_y(:,i) = orig(i).Y;
     end
-    if (Has_ref == 1)
+    if (has_ref == 1)
         e_seq = recon_y - orig_y;
     else 
         e_seq = recon_y - recon_y;
