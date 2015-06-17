@@ -120,7 +120,7 @@ for k = 1:SampleNum
     fclose(fid);
     !ExtractRand.bat
 
-    if (Has_ref == 1)
+    if (has_ref == 1)
         ref_name = 'Orig';
     else
         ref_name = ['Orig', int2str(frame_num), '-dec'];
@@ -135,8 +135,8 @@ for k = 1:SampleNum
     end
     
     figure;
-    title('Compare of real MSE and estimated MSE (No ref)');
-    xlabel('Sample No.');
+    title('Compare of real MSE and estimated MSE');
+    xlabel('Frame Index');
     ylabel('MSE');
     plot(d_actual,'-r');
     hold on

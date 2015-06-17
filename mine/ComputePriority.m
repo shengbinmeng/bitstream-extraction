@@ -5,6 +5,8 @@ Width = 352;
 Height = 288;
 MaxQid = 2;
 ParamLines = 6;
+has_ref = 1;
+use_psnr = 1;
 
 pos = strfind(DIR, '\');
 a = length(pos);
@@ -67,16 +69,21 @@ for i = 1:frame_num
     recon_y(:,i) = recon(i).Y;
     orig_y(:,i) = orig(i).Y;
 end
-e_seq = recon_y - recon_y;
+if (has_ref == 1)
+    e_seq = recon_y - orig_y;
+else
+    e_seq = recon_y - recon_y; 
+end
 clear recon recon_y orig orig_y
 
 mse_seq = mean(e_seq.^2);
-% use psnr
-%psnr_seq = 10*log10(255^2./mse_seq);
-%psnr_seq(psnr_seq > 99) = 99;
-%psnr_seq = mean(psnr_seq);
-% use mse
-mse_seq = sum (mse_seq);
+if (use_psnr == 1)
+    psnr_seq = 10*log10(255^2./mse_seq);
+    psnr_seq(psnr_seq > 99) = 99;
+    psnr_seq = mean(psnr_seq);
+else
+    mse_seq = sum(mse_seq);
+end
 %pri_data = fopen(['data\\', last_folder, int2str(frame_num), '-pri-data.txt'], 'w');
 for j = 1:MaxQid*frame_num
     phi_pkt = zeros(1, frame_num);
@@ -104,15 +111,19 @@ for j = 1:MaxQid*frame_num
         e_pkt = zeros(Width * Height, frame_num);
         e_pkt(:,offset+1:offset+affect_frames) = packet_error(:,1:affect_frames);
         mse_pkt = mean((e_pkt + e_seq).^2);
-        % use psnr
-        %psnr_pkt = 10*log10(255^2./mse_pkt);
-        %psnr_pkt(psnr_pkt > 99) = 99;
-        %psnr_pkt = mean(psnr_pkt);
-        % use mse
-        mse_pkt = sum(mse_pkt);
+        if (use_psnr == 1)
+            psnr_pkt = 10*log10(255^2./mse_pkt);
+            psnr_pkt(psnr_pkt > 99) = 99;
+            psnr_pkt = mean(psnr_pkt);
+        else
+            mse_pkt = sum(mse_pkt);
+        end
         
-        delta_d = mse_pkt - mse_seq;
-        %delta_d = psnr_seq - psnr_pkt;
+        if (use_psnr == 1)
+            delta_d = psnr_seq - psnr_pkt;
+        else
+            delta_d = mse_pkt - mse_seq;
+        end
         delta_r = pkt_length(packets(1,i));
         phi_pkt(i) = abs(delta_d)/(delta_r/1000);
         
@@ -141,12 +152,13 @@ for j = 1:MaxQid*frame_num
     e_pkt(:,offset+1:offset+affect_frames) = packet_error(:,1:affect_frames);
     e_seq = e_seq + e_pkt;
     mse_seq = mean(e_seq.^2);
-    % use psnr
-    %psnr_seq = 10*log10(255^2./mse_seq);
-    %psnr_seq(psnr_seq > 99) = 99;
-    %psnr_seq = mean(psnr_seq);
-    % use sum of mse
-    mse_seq = sum(mse_seq);
+    if (use_psnr == 1)
+        psnr_seq = 10*log10(255^2./mse_seq);
+        psnr_seq(psnr_seq > 99) = 99;
+        psnr_seq = mean(psnr_seq);
+    else
+        mse_seq = sum(mse_seq);
+    end
     
     packets(1:MaxQid-1, min_idx) = packets(2:MaxQid, min_idx); 
     packets(MaxQid, min_idx) = 0;

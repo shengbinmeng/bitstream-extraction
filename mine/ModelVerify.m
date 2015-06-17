@@ -9,7 +9,8 @@ Height = 288;
 ParamLine = 6;
 BIN_PATH = '..\\bin';
 
-fid_out = fopen(['result\\model-verify@', datestr(now, 'yyyymmddHHMMSS'), '.txt'], 'w');
+filename_out = ['result\\model-verify@', datestr(now, 'yyyymmddHHMMSS'), '.txt'];
+fid_out = fopen(filename_out, 'w');
 for v0 = 1:MaxQid
     for v1 = 1:MaxQid
         for v21 = 1:MaxQid
@@ -213,4 +214,5 @@ for v0 = 1:MaxQid
 end
 
 fclose(fid_out);
+PlotDataEstimate(filename_out);
 end

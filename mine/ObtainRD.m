@@ -43,7 +43,6 @@ for k = 1:1:num
     bitrate = (bytes*8)/1000 / frame_num * FrameRate;
     file_name = ['Orig', int2str(frame_num), '-ext', int2str(bytes) ,'bytes'];
     ExtractSubstreamOfRate(DIR, frame_num, pri_vec, bytes);
-    %ExtractSubstreamOfRateGR(DIR, frame_num, bytes);
     fid = fopen('ExtractAndDecode.bat', 'w');
     tline = [BIN_PATH, '\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\extract-mine\\', file_name, '.264 -et ', DIR, '\\trc\\extract-mine\\', file_name, '.txt \r\n'];
     fprintf(fid, tline);
