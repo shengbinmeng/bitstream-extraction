@@ -7,9 +7,9 @@ MaxQid = 2;
 Width = 352;
 Height = 288;
 ParamLines = 6;
-SampleNum = 1;
+SampleNum = 50;
 BIN_PATH = '..\\bin';
-has_ref = 0;
+has_ref = 1;
 
 gop_packets = zeros(MaxQid, 8);
 gop_packets(:, 8) = MaxQid:-1:1;
@@ -34,6 +34,9 @@ packets(:,1) = (MaxQid:-1:1)';
 
 select_map = zeros(1, frame_num);
 decode_to_display = [1 9 5 3 2 4 7 6 8];
+
+min_error = 1.0;
+all_error = zeros(1, SampleNum);
 for k = 1:SampleNum
     for i = 1:frame_num
         rand_id = ceil((MaxQid+1)*rand()); % 1~(MaxQid+1)
@@ -134,15 +137,33 @@ for k = 1:SampleNum
         d_actual(frm) = sse/(Width*Height);
     end
     
-    figure;
-    title('Compare of real MSE and estimated MSE');
-    xlabel('Frame Index');
-    ylabel('MSE');
-    plot(d_actual,'-r');
-    hold on
-    plot(d_estimate,':b');
-    hold off
-    s = sprintf('average estimate error: %f', mean(abs(d_estimate-d_actual)/d_actual));
+    estimate_error = mean(abs(d_estimate-d_actual)/d_actual);
+    s = sprintf('average estimate error: %f', estimate_error);
     display(s);
+    
+    all_error(1, k) = estimate_error;
+    if (estimate_error < min_error)
+        min_error = estimate_error;
+        do_plot = 1;
+    else
+        do_plot = 0;
+    end
+    
+    if (do_plot == 1)
+        figure;
+        plot(d_actual,'-b');
+        hold on
+        plot(d_estimate,':r');
+        title('Compare of real MSE and estimated MSE');
+        xlabel('Frame Index');
+        ylabel('MSE');
+        hold off
+    end
 end
+
+display(all_error);
+display(min_error);
+mean_error = mean(all_error);
+display(mean_error);
+
 end
