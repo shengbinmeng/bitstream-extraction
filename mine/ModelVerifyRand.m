@@ -8,6 +8,8 @@ Width = 352;
 Height = 288;
 ParamLines = 6;
 SampleNum = 1;
+BIN_PATH = '..\\bin';
+Has_ref = 0;
 
 gop_packets = zeros(MaxQid, 8);
 gop_packets(:, 8) = MaxQid:-1:1;
@@ -64,7 +66,7 @@ for k = 1:SampleNum
         end
         for j=map_id:MaxQid
             % discard
-            tline = fgetl(trace);
+            fgetl(trace);
         end
     end
     fclose(tmp);
@@ -79,7 +81,11 @@ for k = 1:SampleNum
         recon_y(:,i) = recon(i).Y;
         orig_y(:,i) = orig(i).Y;
     end
-    e_seq = recon_y - orig_y;
+    if (Has_ref == 1)
+        e_seq = recon_y - orig_y;
+    else 
+        e_seq = recon_y - recon_y;
+    end
     clear recon recon_y orig orig_y
 
     for i = 1:frame_num
@@ -107,15 +113,18 @@ for k = 1:SampleNum
     
     % extract and decode
     fid = fopen('ExtractRand.bat', 'w');
-    tline = ['..\\bin\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
+    tline = [BIN_PATH, '\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
     fprintf(fid, tline);
-    tline = ['..\\bin\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
+    tline = [BIN_PATH, '\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
     fprintf(fid, tline);
     fclose(fid);
     !ExtractRand.bat
 
-    %ref_name = ['Orig', int2str(frame_num), '-dec'];
-    ref_name = 'Orig';
+    if (Has_ref == 1)
+        ref_name = 'Orig';
+    else
+        ref_name = ['Orig', int2str(frame_num), '-dec'];
+    end
     frames_ref = ReadYUV([DIR, '\\yuv\\', ref_name, '.yuv'], Width, Height, 0, frame_num);
     frames = ReadYUV([DIR, '\\yuv\\', file_name, '.yuv'], Width, Height, 0, frame_num);
     d_actual = zeros(1, frame_num);
