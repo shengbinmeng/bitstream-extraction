@@ -35,8 +35,8 @@ packets(:,1) = (MaxQid:-1:1)';
 select_map = zeros(1, frame_num);
 decode_to_display = [1 9 5 3 2 4 7 6 8];
 
-min_error = 1.0;
 all_error = zeros(1, SampleNum);
+min_error = 1.0;
 for k = 1:SampleNum
     for i = 1:frame_num
         rand_id = ceil((MaxQid+1)*rand()); % 1~(MaxQid+1)
