@@ -1,218 +1,169 @@
 function ModelVerify(DIR, frame_num)
-% extract all the possible combinations of enhancement packet numbers in
+% extract randly the possible combinations of enhancement packet numbers in
 % each frame in one GOP
 
 trace = fopen([DIR, '\\trc\\Orig', int2str(frame_num), '.txt'], 'r');
 MaxQid = 2;
 Width = 352;
 Height = 288;
-ParamLine = 6;
+ParamLines = 6;
+SampleNum = 50;
 BIN_PATH = '..\\bin';
+has_ref = 1;
 
-filename_out = ['result\\model-verify@', datestr(now, 'yyyymmddHHMMSS'), '.txt'];
-fid_out = fopen(filename_out, 'w');
-for v0 = 1:MaxQid
-    for v1 = 1:MaxQid
-        for v21 = 1:MaxQid
-            for v22 = 1:MaxQid
-                for v31 = 1:MaxQid
-                    for v32 = 1:MaxQid
-                        for v33 = 1:MaxQid
-                            for v34 = 1:MaxQid
-                                fseek(trace, 0, 'bof');
-                                file_name = ['Extract_Gop_', int2str(v0), int2str(v1), int2str(v21), int2str(v22), int2str(v31), int2str(v32), int2str(v33), int2str(v34)];
-                                tmp = fopen([DIR, '\\trc\\', file_name, '.txt'], 'w');
-                                for i = 1:2+ParamLine
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                
-                                % frm 0
-                                for i = 1:2+MaxQid
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                
-                                % v0
-                                for i = 1:2 %prefix and base layer
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = 1:v0
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = (v0+1):MaxQid
-                                    fgetl(trace);
-                                end
-                                
-                                % v1
-                                
-                                for i = 1:2
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = 1:v1
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = v1+1:MaxQid
-                                    fgetl(trace);
-                                end
-                                
-                                % v21
-                                
-                                for i = 1:2
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = 1:v21
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = v21+1:MaxQid
-                                    fgetl(trace);
-                                end
-                                
-                                % v22
-                                
-                                for i = 1:2
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = 1:v22
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = v22+1:MaxQid
-                                    fgetl(trace);
-                                end
-                                
-                               % v31
-                                
-                                for i = 1:2
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = 1:v31
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = v31+1:MaxQid
-                                    fgetl(trace);
-                                end
-                                
-                                % v32
-                                
-                                for i = 1:2
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = 1:v32
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = v32+1:MaxQid
-                                    fgetl(trace);
-                                end
-                                
-                                % v33
-                                
-                                for i = 1:2
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = 1:v33
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = v33+1:MaxQid
-                                    fgetl(trace);
-                                end
-                                
-                                % v34
-                                
-                                for i = 1:2
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = 1:v34
-                                    tline = fgetl(trace);
-                                    fprintf(tmp, [tline, '\r\n']);
-                                end
-                                for i = v34+1:MaxQid
-                                    fgetl(trace);
-                                end
-                                
-                                fclose(tmp);
-                                
-                                % decode and compare
-                                fid = fopen('Extract.bat', 'w');
-                                tline = [BIN_PATH, '\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
-                                fprintf(fid, tline);
-                                tline = [BIN_PATH, '\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
-                                fprintf(fid, tline);
-                                fclose(fid);
-                                
-                                !Extract.bat
-                                
-                                extract_yuv = ReadYUV([DIR, '\\yuv\\', file_name, '.yuv'], Width, Height, 0, 8);
-                                orig_yuv = ReadYUV([DIR, '\\yuv\\Orig.yuv'], Width, Height, 0, 8);
-                                full_yuv = ReadYUV([DIR, '\\yuv\\Orig', int2str(frame_num), '-dec.yuv'], Width, Height, 0, 8);
-                                extract_y = [];
-                                orig_y = [];
-                                full_y = [];
-                                extract_y = [extract_y extract_yuv.Y];
-                                orig_y = [orig_y orig_yuv.Y];
-                                full_y = [full_y full_yuv.Y];
-                                e_full = double(full_y) - double(orig_y);
-                                
-                                error = double(extract_y) - double(orig_y);
-                                mse = sum(sum(error.^2))/(352*288*8);
-                                
-                                %error_est = zeros(Width*Height, 8);            %this means no ref
-                                error_est = e_full;
-                                for i = v0+1:MaxQid
-                                    error_est = error_est + PacketError( DIR, frame_num, i+MaxQid,1);
-                                end
-                                for i = v1+MaxQid+1:MaxQid*2
-                                    error_est = error_est + PacketError( DIR, frame_num, i+MaxQid,1);
-                                end
-                                for i = v21+MaxQid*2+1:MaxQid*3
-                                    error_est = error_est + PacketError( DIR, frame_num, i+MaxQid,1);
-                                end
-                                for i = v22+MaxQid*3+1:MaxQid*4
-                                    error_est = error_est + PacketError( DIR, frame_num, i+MaxQid,1);
-                                end
-                                for i = v31+MaxQid*4+1:MaxQid*5
-                                    error_est = error_est + PacketError( DIR, frame_num, i+MaxQid,1);
-                                end
-                                for i = v32+MaxQid*5+1:MaxQid*6
-                                    error_est = error_est + PacketError( DIR, frame_num, i+MaxQid,1);
-                                end
-                                for i = v33+MaxQid*6+1:MaxQid*7
-                                    error_est = error_est + PacketError( DIR, frame_num, i+MaxQid,1);
-                                end
-                                for i = v34+MaxQid*7+1:MaxQid*8
-                                    error_est = error_est + PacketError( DIR, frame_num, i+MaxQid,1);
-                                end
-                                
-                                mse_est = sum(sum(error_est.^2))/(352*288*8);
-                                
-                                % Compare the estimated error matrices with
-                                % the actual ones
-                                diff = (mse_est - mse);
-                                relative_diff = (mse_est - mse) / mse;
-                                fprintf(fid_out, '%d %d %d %d %d %d %d %d %f %f %f %f\r\n', v0, v1, v21, v22, v31, v32, v33, v34, mse, mse_est, diff, relative_diff);                                
-                            end
-                        end
-                    end
+gop_packets = zeros(MaxQid, 8);
+gop_packets(:, 8) = MaxQid:-1:1;
+gop_packets(:, 4) = MaxQid*2:-1:MaxQid*1 + 1;
+gop_packets(:, 2) = MaxQid*3:-1:MaxQid*2 + 1;
+gop_packets(:, 1) = MaxQid*4:-1:MaxQid*3 + 1;
+gop_packets(:, 3) = MaxQid*5:-1:MaxQid*4 + 1;
+gop_packets(:, 6) = MaxQid*6:-1:MaxQid*5 + 1;
+gop_packets(:, 5) = MaxQid*7:-1:MaxQid*6 + 1;
+gop_packets(:, 7) = MaxQid*8:-1:MaxQid*7 + 1;
+%{
+gop_packets = ...
+[10	6	12	4	14	8	16	2;
+ 9	5	11	3	13	7	15	1];
+%}
+gop_num = (frame_num - 1)/8;
+packets = zeros(MaxQid, frame_num);
+for i = 0:gop_num-1
+    packets(:,i*8+2:i*8+9) = gop_packets + i * MaxQid*8 + MaxQid;
+end
+packets(:,1) = (MaxQid:-1:1)';
+
+select_map = zeros(1, frame_num);
+decode_to_display = [1 9 5 3 2 4 7 6 8];
+
+all_error = zeros(1, SampleNum);
+min_error = 1.0;
+for k = 1:SampleNum
+    for i = 1:frame_num
+        rand_id = ceil((MaxQid+1)*rand()); % 1~(MaxQid+1)
+        select_map(i) = rand_id;
+    end
+    fseek(trace, 0, 'bof');
+    file_name = ['Discard-Rand-Sample', int2str(k)];
+    tmp = fopen([DIR, '\\trc\\', file_name, '.txt'], 'w');
+    for i = 1:2+ParamLines
+        tline = fgetl(trace);
+        fprintf(tmp, [tline, '\r\n']);
+    end
+    for i = 1:frame_num
+        for j=1:2
+            % base layer
+            tline = fgetl(trace);
+            fprintf(tmp, [tline, '\r\n']);
+        end
+        if (i<=9)
+            frm = decode_to_display(i);
+        else 
+            skip_gop = ceil((i-1)/8) - 1;
+            frm = decode_to_display(i-8*skip_gop) + 8*skip_gop;
+        end
+        
+        map_id = select_map(frm);
+        for j=1:map_id-1
+            tline = fgetl(trace);
+            fprintf(tmp, [tline, '\r\n']);
+        end
+        for j=map_id:MaxQid
+            % discard
+            fgetl(trace);
+        end
+    end
+    fclose(tmp);
+
+    recon_file = [DIR, '\\yuv\\Orig', int2str(frame_num), '-dec.yuv'];
+    recon = ReadYUV(recon_file, Width, Height, 0, frame_num);
+    orig_file = [DIR, '\\yuv\\Orig.yuv'];
+    orig = ReadYUV(orig_file, Width, Height, 0, frame_num);
+    recon_y = zeros(Width*Height, frame_num);
+    orig_y = zeros(Width*Height, frame_num);
+    for i = 1:frame_num
+        recon_y(:,i) = recon(i).Y;
+        orig_y(:,i) = orig(i).Y;
+    end
+    if (has_ref == 1)
+        e_seq = recon_y - orig_y;
+    else 
+        e_seq = recon_y - recon_y;
+    end
+    clear recon recon_y orig orig_y
+
+    for i = 1:frame_num
+        map_id = select_map(i);
+        for j = map_id:MaxQid
+            packet_error =  PacketError(DIR, frame_num, packets(j,i),2);
+            if (i == 1)
+                %first frame
+                affect_frames = 8;
+                offset = 0;
+            else
+                gop_idx = ceil((i-1) / 8);
+                offset = (gop_idx-1)*8 + 1;
+                affect_frames = 15;
+                if (offset + affect_frames > frame_num)
+                    affect_frames = frame_num - offset;
                 end
             end
+
+            e_seq(:,offset+1:offset+affect_frames) = e_seq(:,offset+1:offset+affect_frames) + packet_error(:,1:affect_frames);
         end
+    end
+    
+    d_estimate = sum(e_seq.^2)/(Width*Height);
+    
+    % extract and decode
+    fid = fopen('ExtractRand.bat', 'w');
+    tline = [BIN_PATH, '\\BitStreamExtractorStatic ', DIR, '\\str\\Orig', int2str(frame_num), '.264 ', DIR, '\\str\\', file_name, '.264 -et ', DIR, '\\trc\\', file_name, '.txt \r\n',];
+    fprintf(fid, tline);
+    tline = [BIN_PATH, '\\H264AVCDecoderLibTestStatic ', DIR, '\\str\\', file_name, '.264 ', DIR, '\\yuv\\', file_name, '.yuv \r\n'];
+    fprintf(fid, tline);
+    fclose(fid);
+    !ExtractRand.bat
+
+    if (has_ref == 1)
+        ref_name = 'Orig';
+    else
+        ref_name = ['Orig', int2str(frame_num), '-dec'];
+    end
+    frames_ref = ReadYUV([DIR, '\\yuv\\', ref_name, '.yuv'], Width, Height, 0, frame_num);
+    frames = ReadYUV([DIR, '\\yuv\\', file_name, '.yuv'], Width, Height, 0, frame_num);
+    d_actual = zeros(1, frame_num);
+    for frm = 1:frame_num
+        error = double(frames(frm).Y) - double(frames_ref(frm).Y);
+        sse = sum(error.^2);
+        d_actual(frm) = sse/(Width*Height);
+    end
+    
+    estimate_error = mean(abs(d_estimate-d_actual)/d_actual);
+    s = sprintf('average estimate error: %f', estimate_error);
+    display(s);
+    
+    all_error(1, k) = estimate_error;
+    if (estimate_error < min_error)
+        min_error = estimate_error;
+        do_plot = 1;
+    else
+        do_plot = 0;
+    end
+    
+    if (do_plot == 1)
+        figure;
+        plot(d_actual,'-b');
+        hold on
+        plot(d_estimate,':r');
+        title('Compare of real MSE and estimated MSE');
+        xlabel('Frame Index');
+        ylabel('MSE');
+        hold off
     end
 end
 
-fclose(fid_out);
-PlotDataEstimate(filename_out);
+display(all_error);
+display(min_error);
+mean_error = mean(all_error);
+display(mean_error);
+
 end
