@@ -33,7 +33,7 @@ fwrite(result, s);
 fseek(rd_data, 0, 'bof');
 data_text = fread(rd_data);
 fwrite(result, data_text);
-fwrite(result, '***************************');
+fwrite(result, '***************************\r\n');
 fclose(result);
 fclose(rd_data);
 end
